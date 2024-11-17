@@ -6,7 +6,31 @@ import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-
 import UserAccountCard from "@/components/AccountCard";
 import {SafeAreaView} from "react-native-safe-area-context";
 
+interface TransactionHistory{
+    id: number;
+    amount: number;
+    date: string;
+    type: string;
+}
+
+const mockHistory: TransactionHistory[] = []
+const mockAll: TransactionHistory[] = []
+let selectedWalletId= 0
 export default function HomeScreen() {
+
+    let hist1= {id: 1, amount: 100, date: "2021-09-01", type: "deposit"};
+    let hist2= {id: 2, amount: 200, date: "2021-09-02", type: "withdraw"};
+    let hist3= {id: 3, amount: 300, date: "2021-09-03", type: "deposit"};
+    let hist4= {id: 4, amount: 400, date: "2021-09-04", type: "withdraw"};
+    mockHistory.push(hist1);
+    mockHistory.push(hist2);
+
+    mockAll.push(hist1);
+    mockAll.push(hist2);
+    mockAll.push(hist3);
+    mockAll.push(hist4);
+
+    //All should be visible in the transaction history
 
     const navigation = useNavigation();
 
@@ -24,7 +48,10 @@ export default function HomeScreen() {
                         <FontAwesome6 name="money-bill-transfer" size={24} color="black"/>
                     </Pressable>
                 </Link>
-                <Link href="../other/walletDetails" asChild>
+                <Link href={{
+                    pathname:"../other/walletDetails",
+                    params: {selectedWalletId}
+                }} asChild>
                     <Pressable style={styles.circularButton}>
                         <MaterialCommunityIcons name="card-account-details" size={24} color="black"/>
                     </Pressable>
@@ -32,14 +59,17 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.detailsSection}>
-                <Text style={styles.detailsText}>
-                    Wallet Details
-                </Text>
-                <Text style={styles.detailsText}>
-                    Some recent transactions ???
-                </Text>
+                <Text style={styles.detailsText}>Transaction History</Text>
+                <ScrollView>
+                    {mockHistory.map((transaction) => (
+                        <View key={transaction.id} style={styles.tableRow}>
+                            <Text>{transaction.amount}</Text>
+                            <Text>{transaction.date}</Text>
+                            <Text>{transaction.type}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
             </View>
-
         </SafeAreaView>
     );
 }
@@ -48,7 +78,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "yellow",
+        backgroundColor: "lightblue",
         alignItems: "center",
         justifyContent: "flex-start",
         padding: 10,
@@ -78,8 +108,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-evenly",
         alignItems: "center",
-        backgroundColor: "yellow",
-        marginBottom: 100,
         width: "100%",
     },
 
@@ -87,15 +115,17 @@ const styles = StyleSheet.create({
         width: 75,
         height: 75,
         borderRadius: 70,
-        backgroundColor: 'Lightgrey',
+        backgroundColor: 'lightgrey',
         justifyContent: 'space-around',
         padding: 23,
+        margin: 20
     },
 
     detailsSection: {
         marginVertical: 20,
-        backgroundColor: "green",
-        height:200,
+        backgroundColor: "white",
+        height: 300,
+        width: "100%",
         borderColor: "#555555",
         borderWidth: 3,
         justifyContent: "center",
@@ -103,8 +133,16 @@ const styles = StyleSheet.create({
     },
 
     detailsText: {
-        fontSize: 16,
-        color: "#555555",
+        fontSize: 24
+    },
+
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 10,
+        paddingHorizontal: 5,
+        borderBottomWidth: 1,
+        borderColor: '#eee',
+        justifyContent: 'space-between',
     }
 });
 

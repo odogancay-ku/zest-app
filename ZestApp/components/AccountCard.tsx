@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState, forwardRef} from 'react';
 import {Dimensions, Text, View} from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 
@@ -15,17 +15,22 @@ interface UserAccount {
     cards: Cards[];
 }
 
+let card_list: Cards[] = []
+
 const UserAccountCard = ({userId}: { userId: number }) => {
     const card_1 = {id: 1, name: 'Card 1', balance: 1000};
     const card_2 = {id: 2, name: 'Card 2', balance: 2000};
     const card_3 = {id: 3, name: 'Card 3', balance: 3000};
-    const card_list = [card_1, card_2, card_3]
-    // Mock data
+    card_list.push(card_1)
+    card_list.push(card_2)
+    card_list.push(card_3)
+
     const userAccountData: UserAccount = {
         id: 1,
         name: 'John Doe',
         cards: card_list,
     };
+
     return (
         //for the cards make a card crouse and map the cards
         <Carousel
@@ -34,7 +39,7 @@ const UserAccountCard = ({userId}: { userId: number }) => {
                 return (
                     <View style={
                         {
-                            backgroundColor: 'pink',
+                            backgroundColor: 'white',
                             borderRadius: 10,
                             padding: 20,
                             marginLeft: 10,
