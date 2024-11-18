@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View, Text, ScrollView, Pressable, Dimensions} from 'react-native';
 import {Link, useNavigation} from "expo-router";
 import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import Carousel from "react-native-snap-carousel";
 
 interface TransactionHistory{
     id: number;
+    cardId: number;
     amount: number;
     date: string;
     type: string;
@@ -15,7 +16,6 @@ interface Cards {
     id: number;
     name: string;
     balance: number;
-
 }
 
 interface UserAccount {
@@ -28,11 +28,10 @@ const mockHistory: TransactionHistory[] = []
 const mockAll: TransactionHistory[] = []
 let selectedWalletId= 0
 export default function HomeScreen() {
-
-    let hist1= {id: 1, amount: 100, date: "2021-09-01", type: "deposit"};
-    let hist2= {id: 2, amount: 200, date: "2021-09-02", type: "withdraw"};
-    let hist3= {id: 3, amount: 300, date: "2021-09-03", type: "deposit"};
-    let hist4= {id: 4, amount: 400, date: "2021-09-04", type: "withdraw"};
+    let hist1= {id: 1, cardId: 1, amount: 100, date: "2021-09-01", type: "deposit"};
+    let hist2= {id: 2, cardId: 1, amount: 200, date: "2021-09-02", type: "withdraw"};
+    let hist3= {id: 3, cardId: 2, amount: 300, date: "2021-09-03", type: "deposit"};
+    let hist4= {id: 4, cardId: 3, amount: 400, date: "2021-09-04", type: "withdraw"};
     mockHistory.push(hist1);
     mockHistory.push(hist2);
 
@@ -56,13 +55,14 @@ export default function HomeScreen() {
         cards: card_list,
     };
 
+    const [selectedWalletId, setSelectedWalletId] = useState<number>(card_list[0]?.id || 0);
     const navigation = useNavigation();
     return (
         //TODO: Keep the selected wallet id in the state and pass it to the wallet details page
         <SafeAreaView style={styles.container}>
             <Carousel
                 data={userAccountData.cards}
-                renderItem={({item, index}) => {
+                renderItem={({item}) => {
                     return (
                         <View style={
                             {
@@ -83,6 +83,7 @@ export default function HomeScreen() {
                 sliderWidth={Dimensions.get("screen").width}
                 itemWidth={Dimensions.get("screen").width * 0.8}
                 vertical={false}
+                onSnapToItem={(index) => {setSelectedWalletId(card_list[index].id)}}
             />
             <View style={styles.walletAction}>
                 <Link href="../other/atomicSwap" asChild>
