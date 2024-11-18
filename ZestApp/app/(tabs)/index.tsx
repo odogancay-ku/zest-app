@@ -24,38 +24,29 @@ interface UserAccount {
     cards: Cards[];
 }
 
-const mockHistory: TransactionHistory[] = []
-const mockAll: TransactionHistory[] = []
+const mockAll: TransactionHistory[] = [
+    { id: 1, cardId: 1, amount: 100, date: '2021-09-01', type: 'deposit' },
+    { id: 2, cardId: 1, amount: 200, date: '2021-09-02', type: 'withdraw' },
+    { id: 3, cardId: 2, amount: 300, date: '2021-09-03', type: 'deposit' },
+    { id: 4, cardId: 3, amount: 400, date: '2021-09-04', type: 'withdraw' },
+];
+
+const mockCards: Cards[] = [
+    { id: 1, name: 'Card 1', balance: 1000 },
+    { id: 2, name: 'Card 2', balance: 2000 },
+    { id: 3, name: 'Card 3', balance: 3000 },
+];
 let selectedWalletId= 0
 export default function HomeScreen() {
-    let hist1= {id: 1, cardId: 1, amount: 100, date: "2021-09-01", type: "deposit"};
-    let hist2= {id: 2, cardId: 1, amount: 200, date: "2021-09-02", type: "withdraw"};
-    let hist3= {id: 3, cardId: 2, amount: 300, date: "2021-09-03", type: "deposit"};
-    let hist4= {id: 4, cardId: 3, amount: 400, date: "2021-09-04", type: "withdraw"};
-    mockHistory.push(hist1);
-    mockHistory.push(hist2);
-
-    mockAll.push(hist1);
-    mockAll.push(hist2);
-    mockAll.push(hist3);
-    mockAll.push(hist4);
-
     //All should be visible in the transaction history
-    let card_list: Cards[] = []
-    const card_1 = {id: 1, name: 'Card 1', balance: 1000};
-    const card_2 = {id: 2, name: 'Card 2', balance: 2000};
-    const card_3 = {id: 3, name: 'Card 3', balance: 3000};
-    card_list.push(card_1)
-    card_list.push(card_2)
-    card_list.push(card_3)
 
     const userAccountData: UserAccount = {
         id: 1,
         name: 'John Doe',
-        cards: card_list,
+        cards: mockCards,
     };
 
-    const [selectedWalletId, setSelectedWalletId] = useState<number>(card_list[0]?.id || 0);
+    const [selectedWalletId, setSelectedWalletId] = useState<number>(mockCards[0]?.id || 0);
     const navigation = useNavigation();
     return (
         //TODO: Keep the selected wallet id in the state and pass it to the wallet details page
@@ -83,7 +74,7 @@ export default function HomeScreen() {
                 sliderWidth={Dimensions.get("screen").width}
                 itemWidth={Dimensions.get("screen").width * 0.8}
                 vertical={false}
-                onSnapToItem={(index) => {setSelectedWalletId(card_list[index].id)}}
+                onSnapToItem={(index) => {setSelectedWalletId(mockCards[index].id)}}
             />
             <View style={styles.walletAction}>
                 <Link href="../other/atomicSwap" asChild>
@@ -109,7 +100,7 @@ export default function HomeScreen() {
             <View style={styles.detailsSection}>
                 <Text style={styles.detailsText}>Transaction History</Text>
                 <ScrollView>
-                    {mockHistory.map((transaction) => (
+                    {mockAll.map((transaction) => (
                         <View key={transaction.id} style={styles.tableRow}>
                             <Text>{transaction.amount}</Text>
                             <Text>{transaction.date}</Text>

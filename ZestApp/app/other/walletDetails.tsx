@@ -35,8 +35,6 @@ const mockCards: Cards[] = [
 export default function WalletDetails() {
     const route = useRoute();
     const { selectedWalletId } = route.params as { selectedWalletId: number };
-    console.log(selectedWalletId)
-    console.log(selectedWalletId == 1)
 
     const wallet = mockCards.find((card) => card.id == selectedWalletId);
     const walletTransactions = mockAll.filter((transaction) => transaction.cardId == selectedWalletId);
