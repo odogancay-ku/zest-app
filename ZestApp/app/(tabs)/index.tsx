@@ -102,6 +102,7 @@ export default function HomeScreen() {
                 <ScrollView>
                     {mockAll.map((transaction) => (
                         <View key={transaction.id} style={styles.tableRow}>
+                            <Text>{transaction.cardId}</Text>
                             <Text>{transaction.amount}</Text>
                             <Text>{transaction.date}</Text>
                             <Text>{transaction.type}</Text>
