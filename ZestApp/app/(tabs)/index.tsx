@@ -1,17 +1,18 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, Text, ScrollView, Pressable, Dimensions} from 'react-native';
-import {Link, useNavigation, useRouter} from "expo-router";
+import {Link, useLocalSearchParams, useNavigation, useRouter} from "expo-router";
 import {AntDesign, Feather, FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import Carousel from "react-native-snap-carousel";
 
-interface TransactionHistory{
+interface TransactionHistory {
     id: number;
     cardId: number;
     amount: number;
     date: string;
     type: string;
 }
+
 interface Cards {
     id: number;
     name: string;
@@ -25,19 +26,19 @@ interface UserAccount {
 }
 
 const mockAll: TransactionHistory[] = [
-    { id: 1, cardId: 1, amount: 100, date: '2021-09-01', type: 'deposit' },
-    { id: 2, cardId: 1, amount: 200, date: '2021-09-02', type: 'withdraw' },
-    { id: 3, cardId: 2, amount: 300, date: '2021-09-03', type: 'deposit' },
-    { id: 4, cardId: 3, amount: 400, date: '2021-09-04', type: 'withdraw' },
+    {id: 1, cardId: 1, amount: 100, date: '2021-09-01', type: 'deposit'},
+    {id: 2, cardId: 1, amount: 200, date: '2021-09-02', type: 'withdraw'},
+    {id: 3, cardId: 2, amount: 300, date: '2021-09-03', type: 'deposit'},
+    {id: 4, cardId: 3, amount: 400, date: '2021-09-04', type: 'withdraw'},
 ];
 
 const mockCards: Cards[] = [
-    { id: 1, name: 'Card 1', balance: 1000 },
-    { id: 2, name: 'Card 2', balance: 2000 },
-    { id: 3, name: 'Card 3', balance: 3000 },
-    { id: -1, name: 'Add Wallet', balance: 0 }
+    {id: 1, name: 'Card 1', balance: 1000},
+    {id: 2, name: 'Card 2', balance: 2000},
+    {id: 3, name: 'Card 3', balance: 3000},
+    {id: -1, name: 'Add Wallet', balance: 0}
 ];
-let selectedWalletId= 0
+let selectedWalletId = 0
 export default function HomeScreen() {
     //All should be visible in the transaction history
 
@@ -48,53 +49,52 @@ export default function HomeScreen() {
     };
 
     const [selectedWalletId, setSelectedWalletId] = useState<number>(mockCards[0]?.id || 0);
-    const navigation = useNavigation();
     const router = useRouter();
+    const [cards, setCards] = useState<Cards[]>(mockCards);
 
     return (
-        //TODO: Keep the selected wallet id in the state and pass it to the wallet details page
         <SafeAreaView style={styles.container}>
             <Carousel
-                data={userAccountData.cards}
+                data={cards}
                 renderItem={({item}) => {
                     return (
                         item.id === -1 ?
-                            <View style={
-                                {
-                                    backgroundColor: 'white',
-                                    borderRadius: 10,
-                                    padding: 20,
-                                    height: 200,
-                                    borderColor: "#555555",
-                                    borderWidth: 3,
-                                    justifyContent: "space-evenly",
-                                }}>
+                            <View style={{
+
+                                backgroundColor: 'white',
+                                borderRadius: 10,
+                                padding: 20,
+                                marginLeft: 10,
+                                marginRight: 10,
+                                height: 200,
+                                borderColor: "#555555",
+                                borderWidth: 3,
+                            }}>
                                 {/* Center properly -->*/}
-                                <Link href="../other/addWallet" asChild style={
-                                    {
-                                        marginLeft: 90
-                                    }
-                                }>
-                                    <Pressable style={styles.circularButton}>
-                                        <Feather name="plus" size={24} color="black"/>
-                                    </Pressable>
-                                </Link>
+                                <Pressable style={styles.circularButton}
+                                           onPress={() => {
+                                               router.push('../other/addWallet')
+                                           }}>
+                                    <Feather name="plus" size={24} color="black"/>
+                                </Pressable>
+
                             </View> :
-                            <Pressable onPress={() => router.push({
-                                pathname: '../other/walletDetails',
-                                params: {selectedWalletId: item.id}
-                            })}>
-                                <View style={
-                                    {
-                                        backgroundColor: 'white',
-                                        borderRadius: 10,
-                                        padding: 20,
-                                        marginLeft: 10,
-                                        marginRight: 10,
-                                        height: 200,
-                                        borderColor: "#555555",
-                                        borderWidth: 3,
-                                    }}>
+                            <Pressable onPress={() =>
+                                router.push({
+                                    pathname: '../other/walletDetails',
+                                    params: {selectedWalletId: item.id}
+                                })}>
+                                <View style=
+                                          {{
+                                              backgroundColor: 'white',
+                                              borderRadius: 10,
+                                              padding: 20,
+                                              marginLeft: 10,
+                                              marginRight: 10,
+                                              height: 200,
+                                              borderColor: "#555555",
+                                              borderWidth: 3,
+                                          }}>
                                     <Text>{item.name}</Text>
                                     <Text>{item.balance}</Text>
                                 </View>
@@ -104,7 +104,10 @@ export default function HomeScreen() {
                 sliderWidth={Dimensions.get("screen").width}
                 itemWidth={Dimensions.get("screen").width * 0.8}
                 vertical={false}
-                onSnapToItem={(index) => {setSelectedWalletId(mockCards[index].id)}}
+                onSnapToItem={(index) => {
+                    setSelectedWalletId(mockCards[index].id)
+                }
+                }
             />
             <View style={styles.walletAction}>
                 <Link href="../other/atomicSwap" asChild>
