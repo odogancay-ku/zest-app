@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {StyleSheet, View, Text, ScrollView, Pressable, Dimensions} from 'react-native';
-import {Link, useNavigation} from "expo-router";
-import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
+import {Link, useNavigation, useRouter} from "expo-router";
+import {AntDesign, Feather, FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import Carousel from "react-native-snap-carousel";
 
@@ -35,6 +35,7 @@ const mockCards: Cards[] = [
     { id: 1, name: 'Card 1', balance: 1000 },
     { id: 2, name: 'Card 2', balance: 2000 },
     { id: 3, name: 'Card 3', balance: 3000 },
+    { id: -1, name: 'Add Wallet', balance: 0 }
 ];
 let selectedWalletId= 0
 export default function HomeScreen() {
@@ -48,6 +49,8 @@ export default function HomeScreen() {
 
     const [selectedWalletId, setSelectedWalletId] = useState<number>(mockCards[0]?.id || 0);
     const navigation = useNavigation();
+    const router = useRouter();
+
     return (
         //TODO: Keep the selected wallet id in the state and pass it to the wallet details page
         <SafeAreaView style={styles.container}>
@@ -55,20 +58,47 @@ export default function HomeScreen() {
                 data={userAccountData.cards}
                 renderItem={({item}) => {
                     return (
-                        <View style={
-                            {
-                                backgroundColor: 'white',
-                                borderRadius: 10,
-                                padding: 20,
-                                marginLeft: 10,
-                                marginRight: 10,
-                                height: 200,
-                                borderColor: "#555555",
-                                borderWidth: 3,
-                            }}>
-                            <Text>{item.name}</Text>
-                            <Text>{item.balance}</Text>
-                        </View>
+                        item.id === -1 ?
+                            <View style={
+                                {
+                                    backgroundColor: 'white',
+                                    borderRadius: 10,
+                                    padding: 20,
+                                    height: 200,
+                                    borderColor: "#555555",
+                                    borderWidth: 3,
+                                    justifyContent: "space-evenly",
+                                }}>
+                                {/* Center properly -->*/}
+                                <Link href="../other/addWallet" asChild style={
+                                    {
+                                        marginLeft: 90
+                                    }
+                                }>
+                                    <Pressable style={styles.circularButton}>
+                                        <Feather name="plus" size={24} color="black"/>
+                                    </Pressable>
+                                </Link>
+                            </View> :
+                            <Pressable onPress={() => router.push({
+                                pathname: '../other/walletDetails',
+                                params: {selectedWalletId: item.id}
+                            })}>
+                                <View style={
+                                    {
+                                        backgroundColor: 'white',
+                                        borderRadius: 10,
+                                        padding: 20,
+                                        marginLeft: 10,
+                                        marginRight: 10,
+                                        height: 200,
+                                        borderColor: "#555555",
+                                        borderWidth: 3,
+                                    }}>
+                                    <Text>{item.name}</Text>
+                                    <Text>{item.balance}</Text>
+                                </View>
+                            </Pressable>
                     );
                 }}
                 sliderWidth={Dimensions.get("screen").width}
@@ -79,7 +109,7 @@ export default function HomeScreen() {
             <View style={styles.walletAction}>
                 <Link href="../other/atomicSwap" asChild>
                     <Pressable style={styles.circularButton}>
-                        <MaterialIcons name="currency-exchange" size={24} color="black" />
+                        <MaterialIcons name="currency-exchange" size={24} color="black"/>
                     </Pressable>
                 </Link>
                 <Link href="../other/transaction" asChild>
@@ -88,7 +118,7 @@ export default function HomeScreen() {
                     </Pressable>
                 </Link>
                 <Link href={{
-                    pathname:"../other/walletDetails",
+                    pathname: "../other/walletDetails",
                     params: {selectedWalletId}
                 }} asChild>
                     <Pressable style={styles.circularButton}>
