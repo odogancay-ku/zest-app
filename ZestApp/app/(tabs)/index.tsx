@@ -71,13 +71,17 @@ export default function HomeScreen() {
                                 borderWidth: 3,
                             }}>
                                 {/* Center properly -->*/}
-                                <Pressable style={styles.circularButton}
-                                           onPress={() => {
-                                               router.push('../other/addWallet')
-                                           }}>
-                                    <Feather name="plus" size={24} color="black"/>
-                                </Pressable>
-
+                                <View style={{
+                                    marginLeft: 63,
+                                    marginTop: 15
+                                }}>
+                                    <Pressable style={styles.circularButton}
+                                               onPress={() => {
+                                                   router.push('../other/addWallet')
+                                               }}>
+                                        <Feather name="plus" size={24} color="black"/>
+                                    </Pressable>
+                                </View>
                             </View> :
                             <Pressable onPress={() =>
                                 router.push({
