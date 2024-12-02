@@ -21,6 +21,7 @@ export default function Transaction() {
     const theme = useTheme();
     const [selectedWalletId, setSelectedWalletId] = useState<number>(mockCards[0]?.id || 0);
     const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC");
+    const [receiverWalletAddress, setReceiverWalletAddress] = useState<string>("");
     const [value, setValue] = useState<string>("");
 
     const confirmSelection = () => {
@@ -34,8 +35,12 @@ export default function Transaction() {
         }
     };
 
+    const walletAddressInput = (input: string) => {
+        setReceiverWalletAddress(input);
+    };
+
     const handleSubmit = () => {
-        alert(`You entered: ${value}`);
+        alert(`${value} amount sent to ${receiverWalletAddress}`);
     };
 
     return (
@@ -71,8 +76,8 @@ export default function Transaction() {
                     <Text variant="headlineSmall">Enter the Wallet Address</Text>
                     <TextInput
                         mode="outlined"
-                        value={value}
-                        onChangeText={handleChange}
+                        value={receiverWalletAddress}
+                        onChangeText={walletAddressInput}
                         keyboardType="default"
                         placeholder=""
                     />
