@@ -21,14 +21,14 @@ export default function WalletSettings() {
                 <Button
                     mode="contained"
                     style={styles.button}
-                    onPress={() => router.push("/other/privateKeySettings")}
+                    onPress={() => router.push("/pages/privateKeySettings")}
                 >
                     Private Key Settings
                 </Button>
                 <Button
                     mode="contained"
                     style={styles.button}
-                    onPress={() => router.push("/other/addWallet")}
+                    onPress={() => router.push("/pages/addWallet")}
                 >
                     Add New Wallet
                 </Button>

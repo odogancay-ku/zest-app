@@ -53,7 +53,7 @@ export default function HomeScreen() {
                     return (
                         item.id === -1 ? (
                             <Card style={{height: 200}}
-                                  onPress={() => router.push('../other/addWallet')}
+                                  onPress={() => router.push('/pages/addWallet')}
                             >
                                 <Card.Content style={{alignItems: 'center', justifyContent: 'center', height: '100%'}}
                                 >
@@ -68,7 +68,7 @@ export default function HomeScreen() {
                                 style={{height: 200}}
                                 onPress={() =>
                                     router.push({
-                                        pathname: '/other/walletDetails',
+                                        pathname: '/pages/walletDetails',
                                         params: {selectedWalletId: item.id}
                                     })
                                 }
@@ -95,17 +95,17 @@ export default function HomeScreen() {
                         }}
                         showsHorizontalScrollIndicator={false}>
 
-                <Link href={{pathname: "/other/atomicSwap"}} asChild>
+                <Link href={{pathname: "/pages/atomicSwap"}} asChild>
                     <CircleButton>
                         <MaterialIcons name="currency-exchange" size={30} color="black"/>
                     </CircleButton>
                 </Link>
-                <Link href={{pathname: "/other/transaction"}} asChild>
+                <Link href={{pathname: "/pages/transaction"}} asChild>
                     <CircleButton>
                         <FontAwesome6 name="money-bill-transfer" size={30} color="black"/>
                     </CircleButton>
                 </Link>
-                <Link href={{pathname: "/other/walletDetails", params: {selectedWalletId}}} asChild>
+                <Link href={{pathname: "/pages/walletDetails", params: {selectedWalletId}}} asChild>
                     <CircleButton>
                         <MaterialCommunityIcons name="card-account-details" size={30} color="black"/>
                     </CircleButton>
