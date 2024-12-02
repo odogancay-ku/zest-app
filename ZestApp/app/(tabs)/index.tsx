@@ -1,17 +1,20 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, Text, ScrollView, Pressable, Dimensions} from 'react-native';
-import {Link, useNavigation} from "expo-router";
-import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
+import {Dimensions, Pressable, ScrollView, TouchableOpacity, View} from 'react-native';
+import {Link, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
+import {Card, Button, Text, IconButton, Divider, useTheme} from 'react-native-paper';
 import Carousel from "react-native-snap-carousel";
+import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
+import CircleButton from "@/app/widgets/CircleButton";
 
-interface TransactionHistory{
+interface TransactionHistory {
     id: number;
     cardId: number;
     amount: number;
     date: string;
     type: string;
 }
+
 interface Cards {
     id: number;
     name: string;
@@ -25,166 +28,110 @@ interface UserAccount {
 }
 
 const mockAll: TransactionHistory[] = [
-    { id: 1, cardId: 1, amount: 100, date: '2021-09-01', type: 'deposit' },
-    { id: 2, cardId: 1, amount: 200, date: '2021-09-02', type: 'withdraw' },
-    { id: 3, cardId: 2, amount: 300, date: '2021-09-03', type: 'deposit' },
-    { id: 4, cardId: 3, amount: 400, date: '2021-09-04', type: 'withdraw' },
+    {id: 1, cardId: 1, amount: 100, date: '2021-09-01', type: 'deposit'},
+    {id: 2, cardId: 1, amount: 200, date: '2021-09-02', type: 'withdraw'},
+    {id: 3, cardId: 2, amount: 300, date: '2021-09-03', type: 'deposit'},
+    {id: 4, cardId: 3, amount: 400, date: '2021-09-04', type: 'withdraw'},
 ];
 
 const mockCards: Cards[] = [
-    { id: 1, name: 'Card 1', balance: 1000 },
-    { id: 2, name: 'Card 2', balance: 2000 },
-    { id: 3, name: 'Card 3', balance: 3000 },
+    {id: 1, name: 'Card 1', balance: 1000},
+    {id: 2, name: 'Card 2', balance: 2000},
+    {id: 3, name: 'Card 3', balance: 3000},
+    {id: -1, name: 'Add Wallet', balance: 0}
 ];
-let selectedWalletId= 0
+
 export default function HomeScreen() {
-    //All should be visible in the transaction history
-
-    const userAccountData: UserAccount = {
-        id: 1,
-        name: 'John Doe',
-        cards: mockCards,
-    };
-
     const [selectedWalletId, setSelectedWalletId] = useState<number>(mockCards[0]?.id || 0);
-    const navigation = useNavigation();
+    const router = useRouter();
+
     return (
-        //TODO: Keep the selected wallet id in the state and pass it to the wallet details page
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={{flex: 1, padding: 10, backgroundColor: useTheme().colors.background}}>
             <Carousel
-                data={userAccountData.cards}
+                data={mockCards}
                 renderItem={({item}) => {
                     return (
-                        <View style={
-                            {
-                                backgroundColor: 'white',
-                                borderRadius: 10,
-                                padding: 20,
-                                marginLeft: 10,
-                                marginRight: 10,
-                                height: 200,
-                                borderColor: "#555555",
-                                borderWidth: 3,
-                            }}>
-                            <Text>{item.name}</Text>
-                            <Text>{item.balance}</Text>
-                        </View>
+                        item.id === -1 ? (
+                            <Card style={{height: 200}}
+                                  onPress={() => router.push('/pages/addWallet')}
+                            >
+                                <Card.Content style={{alignItems: 'center', justifyContent: 'center', height: '100%'}}
+                                >
+                                    <IconButton
+                                        icon="plus"
+                                        size={40}
+                                    />
+                                </Card.Content>
+                            </Card>
+                        ) : (
+                            <Card
+                                style={{height: 200}}
+                                onPress={() =>
+                                    router.push({
+                                        pathname: '/pages/walletDetails',
+                                        params: {selectedWalletId: item.id}
+                                    })
+                                }
+                            >
+                                <Card.Content style={{height: '100%'}}>
+                                    <Text variant="headlineSmall">{item.name}</Text>
+                                    <Text>{item.balance}</Text>
+                                </Card.Content>
+                            </Card>
+                        )
                     );
                 }}
                 sliderWidth={Dimensions.get("screen").width}
                 itemWidth={Dimensions.get("screen").width * 0.8}
                 vertical={false}
-                onSnapToItem={(index) => {setSelectedWalletId(mockCards[index].id)}}
+                onSnapToItem={(index) => setSelectedWalletId(mockCards[index].id)}
             />
-            <View style={styles.walletAction}>
-                <Link href="../other/atomicSwap" asChild>
-                    <Pressable style={styles.circularButton}>
-                        <MaterialIcons name="currency-exchange" size={24} color="black" />
-                    </Pressable>
-                </Link>
-                <Link href="../other/transaction" asChild>
-                    <Pressable style={styles.circularButton}>
-                        <FontAwesome6 name="money-bill-transfer" size={24} color="black"/>
-                    </Pressable>
-                </Link>
-                <Link href={{
-                    pathname:"../other/walletDetails",
-                    params: {selectedWalletId}
-                }} asChild>
-                    <Pressable style={styles.circularButton}>
-                        <MaterialCommunityIcons name="card-account-details" size={24} color="black"/>
-                    </Pressable>
-                </Link>
-            </View>
 
-            <View style={styles.detailsSection}>
-                <Text style={styles.detailsText}>Transaction History</Text>
+            <ScrollView horizontal={true} style={{height: 0, width: '100%'}}
+                        contentContainerStyle={{
+                            flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+                            gap: 30,
+                            padding: 10
+                        }}
+                        showsHorizontalScrollIndicator={false}>
+
+                <Link href={{pathname: "/pages/atomicSwap"}} asChild>
+                    <CircleButton>
+                        <MaterialIcons name="currency-exchange" size={30} color="black"/>
+                    </CircleButton>
+                </Link>
+                <Link href={{pathname: "/pages/transaction"}} asChild>
+                    <CircleButton>
+                        <FontAwesome6 name="money-bill-transfer" size={30} color="black"/>
+                    </CircleButton>
+                </Link>
+                <Link href={{pathname: "/pages/walletDetails", params: {selectedWalletId}}} asChild>
+                    <CircleButton>
+                        <MaterialCommunityIcons name="card-account-details" size={30} color="black"/>
+                    </CircleButton>
+                </Link>
+            </ScrollView>
+
+            <Card style={{marginTop: 20, padding: 10}}>
+                <Card.Title title="Transaction History"/>
+                <Divider/>
                 <ScrollView>
                     {mockAll.map((transaction) => (
-                        <View key={transaction.id} style={styles.tableRow}>
-                            <Text>{transaction.cardId}</Text>
-                            <Text>{transaction.amount}</Text>
-                            <Text>{transaction.date}</Text>
-                            <Text>{transaction.type}</Text>
+                        <View key={transaction.id} style={{
+                            flexDirection: 'row',
+                            paddingVertical: 10,
+                            paddingHorizontal: 5,
+                            borderBottomWidth: 1,
+                            borderColor: '#eee'
+                        }}>
+                            <Text style={{flex: 1}}>{transaction.cardId}</Text>
+                            <Text style={{flex: 1}}>{transaction.amount}</Text>
+                            <Text style={{flex: 1}}>{transaction.date}</Text>
+                            <Text style={{flex: 1}}>{transaction.type}</Text>
                         </View>
                     ))}
                 </ScrollView>
-            </View>
+            </Card>
         </SafeAreaView>
     );
 }
-
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "lightyellow",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        padding: 10,
-
-    },
-
-    walletContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-
-    walletCard: {
-        width: 200,
-        height: 100,
-        backgroundColor: "#ffffff",
-        marginHorizontal: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 10,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-    },
-
-    walletAction: {
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-        alignItems: "center",
-        width: "100%",
-    },
-
-    circularButton: {
-        width: 75,
-        height: 75,
-        borderRadius: 70,
-        borderColor: "black",
-        borderWidth: 1,
-        backgroundColor: 'lightgrey',
-        justifyContent: 'space-around',
-        padding: 23,
-        margin: 20
-    },
-
-    detailsSection: {
-        marginVertical: 20,
-        backgroundColor: "white",
-        height: 300,
-        width: "100%",
-        borderColor: "#555555",
-        borderWidth: 3,
-        justifyContent: "center",
-
-    },
-
-    detailsText: {
-        fontSize: 24
-    },
-
-    tableRow: {
-        flexDirection: 'row',
-        paddingVertical: 10,
-        paddingHorizontal: 5,
-        borderBottomWidth: 1,
-        borderColor: '#eee',
-        justifyContent: 'space-between',
-    }
-});
-
