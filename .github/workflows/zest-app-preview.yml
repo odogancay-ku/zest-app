@@ -27,7 +27,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-          cache: npm  # Use npm for caching
+          cache: npm
+          cache-dependency-path: '**/package-lock.json' # Necessary since we have a monorepo
 
       - name: Navigate to ZestApp directory
         run: cd ZestApp
