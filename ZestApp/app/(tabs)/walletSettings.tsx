@@ -2,64 +2,51 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Stack, useNavigation, useRouter} from 'expo-router';
-import {Provider as PaperProvider, Button, Appbar} from 'react-native-paper';
+import {Provider as PaperProvider, Button, Appbar, useTheme} from 'react-native-paper';
 
 export default function WalletSettings() {
     const router = useRouter();
     const navigation = useNavigation();
 
     return (
-        <PaperProvider>
-            <SafeAreaView style={styles.container}>
-                <Appbar.Header>
-                    <Appbar.BackAction onPress={() => navigation.goBack()} />
-                    <Appbar.Content title="Wallet Settings" />
-                </Appbar.Header>
-                <View style={styles.buttonContainer}>
-                    <Button
-                        mode="contained"
-                        onPress={() => router.push('../other/privateKeySettings')}
-                        style={styles.button}
-                    >
-                        Private Key Settings
-                    </Button>
-                    <View style={styles.spacer} />
-                    <Button
-                        mode="contained"
-                        onPress={() => router.push('../other/addWallet')}
-                        style={styles.button}
-                    >
-                        Add New Wallet
-                    </Button>
-                    <View style={styles.spacer} />
-                    <Button
-                        mode="contained"
-                        color="red"
-                        onPress={() => navigation.goBack()}
-                        style={styles.button}
-                    >
-                        Delete This Wallet
-                    </Button>
-                </View>
-            </SafeAreaView>
-        </PaperProvider>
+        <SafeAreaView style={{flex: 1, padding: 10, backgroundColor: useTheme().colors.background}}>
+            <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+                gap: 20,
+            }}
+            >
+                <Button
+                    mode="contained"
+                    style={styles.button}
+                    onPress={() => router.push("/other/privateKeySettings")}
+                >
+                    Private Key Settings
+                </Button>
+                <Button
+                    mode="contained"
+                    style={styles.button}
+                    onPress={() => router.push("/other/addWallet")}
+                >
+                    Add New Wallet
+                </Button>
+                <Button
+                    mode="contained"
+                    style={styles.button}
+                    onPress={() => navigation.goBack()}
+                >
+                    Delete This Wallet
+                </Button>
+            </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-    },
-    buttonContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    spacer: {
-        height: 20, // Space between buttons
-    },
     button: {
         width: '80%',
+        fontWeight: 'bold',
     },
 });
