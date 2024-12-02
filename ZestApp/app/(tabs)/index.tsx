@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
-import {Dimensions, ScrollView, View} from 'react-native';
+import {Dimensions, Pressable, ScrollView, TouchableOpacity, View} from 'react-native';
 import {Link, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {Card, Button, Text, IconButton, Divider} from 'react-native-paper';
+import {Card, Button, Text, IconButton, Divider, useTheme} from 'react-native-paper';
 import Carousel from "react-native-snap-carousel";
+import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
+import CircleButton from "@/app/widgets/CircleButton";
 
 interface TransactionHistory {
     id: number;
@@ -44,7 +46,7 @@ export default function HomeScreen() {
     const router = useRouter();
 
     return (
-        <SafeAreaView style={{flex: 1, padding: 10}}>
+        <SafeAreaView style={{flex: 1, padding: 10, backgroundColor: useTheme().colors.background}}>
             <Carousel
                 data={mockCards}
                 renderItem={({item}) => {
@@ -66,7 +68,7 @@ export default function HomeScreen() {
                                 style={{height: 200}}
                                 onPress={() =>
                                     router.push({
-                                        pathname: '../other/walletDetails',
+                                        pathname: '/other/walletDetails',
                                         params: {selectedWalletId: item.id}
                                     })
                                 }
@@ -85,27 +87,28 @@ export default function HomeScreen() {
                 onSnapToItem={(index) => setSelectedWalletId(mockCards[index].id)}
             />
 
-            <ScrollView horizontal={true} style={{height: 0}}
-                        contentContainerStyle={{flexDirection: 'row', justifyContent: 'space-evenly'}}
+            <ScrollView horizontal={true} style={{height: 0, width: '100%'}}
+                        contentContainerStyle={{
+                            flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+                            gap: 30,
+                            padding: 10
+                        }}
                         showsHorizontalScrollIndicator={false}>
 
                 <Link href={{pathname: "/other/atomicSwap"}} asChild>
-                    <Button icon="swap-horizontal-bold" mode="contained" style={{marginHorizontal: 10}}
-                            contentStyle={{height: '100%'}}>
-                        Atomic Swap
-                    </Button>
+                    <CircleButton>
+                        <MaterialIcons name="currency-exchange" size={30} color="black"/>
+                    </CircleButton>
                 </Link>
                 <Link href={{pathname: "/other/transaction"}} asChild>
-                    <Button icon="bank-transfer-in" mode="contained" style={{marginHorizontal: 10}}
-                            contentStyle={{height: '100%'}}>
-                        Transaction
-                    </Button>
+                    <CircleButton>
+                        <FontAwesome6 name="money-bill-transfer" size={30} color="black"/>
+                    </CircleButton>
                 </Link>
                 <Link href={{pathname: "/other/walletDetails", params: {selectedWalletId}}} asChild>
-                    <Button icon="card-account-details" mode="contained" style={{marginHorizontal: 10}}
-                            contentStyle={{height: '100%'}}>
-                        Wallet Details
-                    </Button>
+                    <CircleButton>
+                        <MaterialCommunityIcons name="card-account-details" size={30} color="black"/>
+                    </CircleButton>
                 </Link>
             </ScrollView>
 
