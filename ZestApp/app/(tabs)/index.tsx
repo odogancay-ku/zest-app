@@ -6,8 +6,6 @@ import {Card, Text, IconButton, Divider, useTheme} from 'react-native-paper';
 import Carousel from "react-native-snap-carousel";
 import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 import CircleButton from "@/app/widgets/CircleButton";
-import {white} from "react-native-paper/lib/typescript/styles/themes/v2/colors";
-import {Colors} from "@/constants/Colors";
 
 interface TransactionHistory {
     id: number;
@@ -84,7 +82,10 @@ export default function HomeScreen() {
                 sliderWidth={Dimensions.get("screen").width}
                 itemWidth={Dimensions.get("screen").width * 0.8}
                 vertical={false}
-                onSnapToItem={(index) => setSelectedWalletId(mockCards[index].id)}
+                onScrollIndexChanged={(index) => {
+                    console.log("Selected wallet id: ", mockCards[index].id);
+                    setSelectedWalletId(mockCards[index].id)
+                }}
             />
 
             <ScrollView horizontal={true} style={{height: 100, width: '100%'}}
