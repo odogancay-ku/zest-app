@@ -53,7 +53,7 @@ export default function HomeScreen() {
                             <Card style={{height: 200}}
                                   onPress={() => router.push('../other/addWallet')}
                             >
-                                <Card.Content style={{alignItems: 'center', justifyContent: 'center', flex: 1}}
+                                <Card.Content style={{alignItems: 'center', justifyContent: 'center', height: '100%'}}
                                 >
                                     <IconButton
                                         icon="plus"
