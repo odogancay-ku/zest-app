@@ -71,7 +71,7 @@ export default function HomeScreen() {
                                     })
                                 }
                             >
-                                <Card.Content>
+                                <Card.Content style={{height: '100%'}}>
                                     <Text variant="headlineSmall">{item.name}</Text>
                                     <Text>{item.balance}</Text>
                                 </Card.Content>
