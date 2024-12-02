@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-          cache: yarn
+          cache: npm  # Use npm for caching
 
       - name: Navigate to ZestApp directory
         run: cd ZestApp
@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ZestApp
-          yarn install
+          npm install  # Use npm to install dependencies
 
       - name: Create preview
         run: |
