@@ -30,9 +30,6 @@ jobs:
           cache: npm
           cache-dependency-path: '**/package-lock.json' # Necessary since we have a monorepo
 
-      - name: Navigate to ZestApp directory
-        run: cd ZestApp
-
       - name: Setup EAS
         uses: expo/expo-github-action@v8
         with:
@@ -40,11 +37,9 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: |
-          cd ZestApp
-          npm install  # Use npm to install dependencies
+        run: npm install
 
       - name: Create preview
-        run: |
-          cd ZestApp
-          eas update --auto
+        uses: expo/expo-github-action/preview@v8
+        with:
+          command: eas update --auto
