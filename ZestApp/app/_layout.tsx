@@ -1,9 +1,7 @@
 import React, {useEffect} from 'react';
-import {DarkTheme as NavigationDarkTheme, DefaultTheme as NavigationDefaultTheme} from '@react-navigation/native';
 import {
     Provider as PaperProvider,
-    MD3DarkTheme as PaperDarkTheme,
-    DefaultTheme as PaperDefaultTheme
+    MD3DarkTheme, MD3LightTheme
 } from 'react-native-paper';
 import {useFonts} from 'expo-font';
 import {Stack} from 'expo-router';
@@ -11,6 +9,24 @@ import * as SplashScreen from 'expo-splash-screen';
 import {useColorScheme} from '@/hooks/useColorScheme';
 
 SplashScreen.preventAutoHideAsync();
+
+const DarkTheme = {
+    ...MD3DarkTheme,
+    colors: {
+        ...MD3DarkTheme.colors,
+        primary: '#dbac34',
+        primaryContainer: '#b68200',
+    }
+}
+
+const LightTheme = {
+    ...MD3LightTheme,
+    colors: {
+        ...MD3LightTheme.colors,
+        primary: '#dbac34',
+        primaryContainer: '#b68200',
+    }
+}
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
@@ -29,9 +45,7 @@ export default function RootLayout() {
         return null;
     }
 
-    const theme = colorScheme === 'dark' ? PaperDarkTheme : PaperDefaultTheme;
-    // TODO: CHANGE THIS BACK TO THE ABOVE LINE
-    // const theme = colorScheme === 'dark' ? PaperDarkTheme : PaperDarkTheme;
+    const theme = colorScheme === 'dark' ? DarkTheme : LightTheme;
 
     return (
         <PaperProvider theme={theme}>
