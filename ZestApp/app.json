@@ -43,6 +43,12 @@
         "projectId": "69d502aa-0f49-4a49-846a-00de83244f78"
       }
     },
-    "owner": "ofarukdogancay"
+    "owner": "ofarukdogancay",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/69d502aa-0f49-4a49-846a-00de83244f78"
+    }
   }
 }
