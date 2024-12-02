@@ -45,7 +45,7 @@ export default function WalletDetails() {
             <Stack.Screen
                 options={{
                     title: 'Wallet Details for wallet ' + selectedWalletId,
-                    headerStyle: {backgroundColor: theme.colors.primary},
+                    headerStyle: {backgroundColor: theme.colors.primaryContainer},
                     headerTintColor: theme.colors.onPrimary,
                     headerTitleStyle: {
                         fontWeight: 'bold',

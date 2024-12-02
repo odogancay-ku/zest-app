@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Dimensions, ScrollView, View} from 'react-native';
+import {Dimensions, Pressable, ScrollView, TouchableOpacity, View} from 'react-native';
 import {Link, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Card, Text, IconButton, Divider, useTheme} from 'react-native-paper';
@@ -64,10 +64,12 @@ export default function HomeScreen() {
                             </Card.Content>
                         </Card>
                     ) : (
-                        <Card style={{
+                        <TouchableOpacity
+                              onPress={() => router.push({ pathname: '/pages/walletDetails', params: { selectedWalletId: item.id } })}
+                        >
+                            <Card style={{
                             height: 200, backgroundColor: theme.colors.primaryContainer
                         }}
-                              onPress={() => router.push({ pathname: '/pages/walletDetails', params: { selectedWalletId: item.id } })}
 
                         >
                             <Card.Content style={{height: '100%'}}>
@@ -75,6 +77,8 @@ export default function HomeScreen() {
                                 <Text>{item.balance}</Text>
                             </Card.Content>
                         </Card>
+                        </TouchableOpacity>
+
                     )
                 )}
                 sliderWidth={Dimensions.get("screen").width}

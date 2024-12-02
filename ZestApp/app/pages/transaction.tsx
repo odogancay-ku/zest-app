@@ -48,7 +48,7 @@ export default function Transaction() {
             <Stack.Screen
                 options={{
                     title: 'Transaction',
-                    headerStyle: {backgroundColor: theme.colors.primary},
+                    headerStyle: {backgroundColor: theme.colors.primaryContainer},
                     headerTintColor: theme.colors.onPrimary,
                     headerTitleStyle: {
                         fontWeight: 'bold',

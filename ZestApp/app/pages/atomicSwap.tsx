@@ -43,7 +43,7 @@ export default function AtomicSwap() {
             <Stack.Screen
                 options={{
                     title: 'Atomic Swap',
-                    headerStyle: {backgroundColor: theme.colors.primary},
+                    headerStyle: {backgroundColor: theme.colors.primaryContainer},
                     headerTintColor: theme.colors.onPrimary,
                     headerTitleStyle: {
                         fontWeight: 'bold',
