@@ -9,6 +9,7 @@ export default function AddWallet() {
     const router = useRouter();
     const navigation = useNavigation();
 
+
     const saveWallet = () => {
         const newWallet = {
             id: Math.random(), // Generate a unique ID for the new wallet
