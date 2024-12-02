@@ -18,6 +18,7 @@ export default function TabLayout() {
                 tabBarInactiveBackgroundColor: theme.colors.surfaceVariant,
                 tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
                 headerShown: false,
+                sceneStyle: {backgroundColor: theme.colors.background},
             }}>
             <Tabs.Screen
                 name="index"
