@@ -2,23 +2,28 @@ import React, {useState} from 'react';
 import {Button, Text, TextInput, View, StyleSheet} from "react-native";
 import {Stack, useLocalSearchParams, useNavigation, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
+import {useFocusEffect} from '@react-navigation/native';
 
 export default function AddWallet() {
     const [walletName, setWalletName] = useState('');
     const [walletNetwork, setWalletNetwork] = useState('');
+    const [privateKeywords, setPrivateKeywords] = useState<string[]>([]);
     const router = useRouter();
     const navigation = useNavigation();
+    const params = useLocalSearchParams<{ keywords: string[] }>();
 
     const saveWallet = () => {
-        const newWallet = {
-            id: Math.random(), // Generate a unique ID for the new wallet
-            name: walletName,
-            balance: 0, // Initial balance
-            network: walletNetwork,
-        };
-        //use shared variable
-        navigation.goBack()
+        navigation.goBack();
     };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            console.log(params);
+            if (params.keywords) {
+                setPrivateKeywords(params.keywords);
+            }
+        }, [params])
+    );
 
     return (
         <SafeAreaView style={{
@@ -59,7 +64,14 @@ export default function AddWallet() {
             <Button
                 title="Insert Private Key Keywords"
                 onPress={() => {
-                    router.push('../other/privateKeywords')
+                    router.push({
+                        pathname: './privateKeywords',
+                        params: {
+                            name: walletName,
+                            network: walletNetwork,
+                            keywords: privateKeywords
+                        },
+                    })
                 }}
             />
 

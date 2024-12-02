@@ -1,13 +1,20 @@
-import {Stack, useNavigation} from "expo-router";
+import {Stack, router} from "expo-router";
 import React, {useState} from "react";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Button, View, Text, StyleSheet, TextInput, ScrollView} from "react-native";
 
 export default function PrivateKeywords() {
-    // 12 input fields for the private key keywords
 
-    const [privateKeywords, setPrivateKeywords] = useState<string[]>(new Array(12).fill(''));
-    const navigator = useNavigation();
+    const [mnemonicKeywords, setMnemonicKeywords] = useState<string[]>(new Array(12).fill(''));
+    
+    const handleGoBack = () => {
+        router.navigate({
+            pathname: './addWallet',
+            params: {keywords: mnemonicKeywords}
+        })
+    }
+    //For test set the private key to 'test test test test test test test test test test test junk'
+    
     return (
         <SafeAreaView style={{
             padding: 20,
@@ -26,27 +33,27 @@ export default function PrivateKeywords() {
             />
             <Text style={styles.label}>Enter your private key keywords</Text>
             <ScrollView>
-                {privateKeywords.map((keyword, index) => (
+                {mnemonicKeywords.map((keyword, index) => (
                     index % 2 === 0 && (
                         <View key={index} style={styles.row}>
                             <TextInput
                                 style={styles.input}
-                                value={privateKeywords[index]}
+                                value={mnemonicKeywords[index]}
                                 onChangeText={(text) => {
-                                    const newKeywords = [...privateKeywords];
+                                    const newKeywords = [...mnemonicKeywords];
                                     newKeywords[index] = text;
-                                    setPrivateKeywords(newKeywords);
+                                    setMnemonicKeywords(newKeywords);
                                 }}
                                 placeholder={`Enter keyword ${index + 1}`}
                             />
-                            {index + 1 < privateKeywords.length && (
+                            {index + 1 < mnemonicKeywords.length && (
                                 <TextInput
                                     style={styles.input}
-                                    value={privateKeywords[index + 1]}
+                                    value={mnemonicKeywords[index + 1]}
                                     onChangeText={(text) => {
-                                        const newKeywords = [...privateKeywords];
+                                        const newKeywords = [...mnemonicKeywords];
                                         newKeywords[index + 1] = text;
-                                        setPrivateKeywords(newKeywords);
+                                        setMnemonicKeywords(newKeywords);
                                     }}
                                     placeholder={`Enter keyword ${index + 2}`}
                                 />
@@ -57,8 +64,7 @@ export default function PrivateKeywords() {
             </ScrollView>
             <Button
                 title="Save Keys"
-                onPress={() => { navigator.goBack()
-                }}
+                onPress={handleGoBack}
             />
         </SafeAreaView>
     );
