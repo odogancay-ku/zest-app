@@ -53,7 +53,7 @@ export default function HomeScreen() {
                 renderItem={({item}) => (
                     item.id === -1 ? (
                         <Card
-                            style={{height: 200}}
+                            style={{height: 200, backgroundColor: theme.colors.primaryContainer}}
                             onPress={() => router.push('/pages/addWallet')}
                         >
                             <Card.Content style={{alignItems: 'center', justifyContent: 'center', height: '100%'}}>
@@ -64,7 +64,12 @@ export default function HomeScreen() {
                             </Card.Content>
                         </Card>
                     ) : (
-                        <Card style={{height: 200}}>
+                        <Card style={{
+                            height: 200, backgroundColor: theme.colors.primaryContainer
+                        }}
+                              onPress={() => router.push({ pathname: '/pages/walletDetails', params: { selectedWalletId: item.id } })}
+
+                        >
                             <Card.Content style={{height: '100%'}}>
                                 <Text variant="headlineSmall">{item.name}</Text>
                                 <Text>{item.balance}</Text>
