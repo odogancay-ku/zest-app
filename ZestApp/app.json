@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "org.zest.ZestApp"
     },
     "android": {
       "adaptiveIcon": {
@@ -33,6 +34,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "69d502aa-0f49-4a49-846a-00de83244f78"
+      }
+    },
+    "owner": "ofarukdogancay"
   }
 }
