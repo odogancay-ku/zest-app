@@ -57,7 +57,11 @@ export default function AddWallet() {
                 <Button
                     mode="contained"
                     onPress={() => {
-                        router.push('/pages/privateKeywords');
+                        router.push(
+                            {
+                                pathname: './privateKeywords',
+                                params: { network: walletNetwork },
+                            });
                     }}
                 >
                     Insert Private Key Keywords
