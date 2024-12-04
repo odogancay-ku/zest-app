@@ -3,6 +3,16 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {Stack, useNavigation, useRouter} from 'expo-router';
 import {TextInput, Button, Text, useTheme, Surface} from 'react-native-paper';
 import {Picker} from "@react-native-picker/picker";
+import * as SecureStore from 'expo-secure-store';
+
+const generateBitcoinAddress = (): string => {
+    const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    let address = '1';
+    for (let i = 0; i < 25; i++) {
+        address += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return address;
+};
 
 export default function AddWallet() {
     const [walletName, setWalletName] = useState('');
@@ -11,15 +21,18 @@ export default function AddWallet() {
     const navigation = useNavigation();
     const theme = useTheme();
     const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC");
-    const saveWallet = () => {
-        const newWallet = {
-            id: Math.random(), // Generate a unique ID for the new wallet
-            name: walletName,
-            balance: 0, // Initial balance
-            network: walletNetwork,
-        };
-        // use shared variable
-        navigation.goBack();
+    const saveWallet = async () => {
+        let storedWallets = await SecureStore.getItemAsync('wallets');
+        const wallets = storedWallets ? JSON.parse(storedWallets) : [];
+
+        if (wallets.length === 3) {
+            wallets[2] = {id: "3", name: walletName, balance: Math.floor(Math.random()*100.000), network: walletNetwork};
+        } else {
+            wallets.push({id: (wallets.length + 1).toString(), name: walletName, balance: Math.floor(Math.random()*100.000), network: walletNetwork});
+        }
+
+        await SecureStore.setItemAsync('wallets', JSON.stringify(wallets));
+        router.replace('/');
     };
 
     return (

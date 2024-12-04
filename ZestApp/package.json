@@ -51,6 +51,7 @@
     "react-native-screens": "~4.1.0",
     "react-native-snap-carousel": "^4.0.0-beta.6",
     "react-native-web": "~0.19.10",
+    "expo-secure-store": "~14.0.0",
     "secp256k1": "^5.0.1",
     "tiny-secp256k1": "^2.2.3"
   },
