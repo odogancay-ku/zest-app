@@ -63,6 +63,7 @@ export default function HomeScreen() {
                                 <IconButton
                                     icon="plus"
                                     size={40}
+                                    style={{ borderWidth: 1, backgroundColor: theme.colors.onPrimary }}
                                 />
                             </Card.Content>
                         </Card>
