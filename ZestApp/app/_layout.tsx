@@ -8,6 +8,16 @@ import {Stack} from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import {useColorScheme} from '@/hooks/useColorScheme';
 
+import "./shims";
+import ECPairFactory from 'ecpair';
+import ecc from '@bitcoinerlab/secp256k1';
+import bip32 from 'bip32';
+import bip39 from 'bip39';
+const bitcoin = require('bitcoinjs-lib');
+const ECPair = ECPairFactory(ecc);
+const keyPair = ECPair.makeRandom();
+const {address} = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey});
+
 SplashScreen.preventAutoHideAsync();
 
 const DarkTheme = {

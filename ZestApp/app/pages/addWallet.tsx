@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useNavigation, useRouter } from 'expo-router';
 import { TextInput, Button, Text, useTheme, Surface } from 'react-native-paper';
+import generateKey from "@/app/test";
 
 export default function AddWallet() {
     const [walletName, setWalletName] = useState('');
@@ -11,6 +12,9 @@ export default function AddWallet() {
     const theme = useTheme();
 
     const saveWallet = () => {
+        console.log("save wallet")
+        generateKey().then(r => console.log(r));
+        console.log("after")
         const newWallet = {
             id: Math.random(), // Generate a unique ID for the new wallet
             name: walletName,
