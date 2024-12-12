@@ -24,7 +24,7 @@ export default function PrivateKeywords() {
 
     useEffect(() => {
         console.log(network)
-        let test_mnemonic = "praise you muffin lion enable neck grocery crumble super myself license ghost"
+        let test_mnemonic = "praise valley time inject leg vintage burst bottom unfair luggage mixed level"
         setMnemonicPhrase(test_mnemonic.split(' '))
     }, []);
 

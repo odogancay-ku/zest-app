@@ -7,13 +7,10 @@ import Carousel from "react-native-snap-carousel";
 import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 import CircleButton from "@/app/widgets/CircleButton";
 import * as SecureStore from 'expo-secure-store';
+import {Wallet} from "@/models/models";
+import {fetchBalance} from "@/app/wallet-import";
 
-interface Wallet {
-    id: string;
-    name: string;
-    balance: number;
-}
-
+//TODO: remove the mock data
 interface TransactionHistory {
     walletId: string;
     amount: number;
@@ -44,6 +41,12 @@ export default function HomeScreen() {
                 return;
             }
             setWallets(JSON.parse(storedWallets));
+            console.log("\nfetching Balances:\n")
+            for (let i = 0; i < wallets.length; i++) {
+                let wallet = wallets[i];
+                let balance = await fetchBalance(wallet.address);
+               console.log(balance);
+            }
         };
         fetchWallets()
     }, []));
@@ -80,7 +83,7 @@ export default function HomeScreen() {
                             }}>
                                 <Card.Content style={{height: '100%'}}>
                                     <Text variant="headlineSmall">{item.name}</Text>
-                                    <Text>{item.balance}</Text>
+                                    <Text>Add balances</Text>
                                 </Card.Content>
                             </Card>
                         </TouchableOpacity>

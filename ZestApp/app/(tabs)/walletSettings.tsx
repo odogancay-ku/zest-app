@@ -22,7 +22,7 @@ export default function WalletSettings() {
                 <Button
                     mode="contained"
                     style={styles.button}
-                    onPress={() => router.push("/pages/privateKeySettings")}
+                    onPress={() => router.push("/pages/privateKeywords")}
                 >
                     Private Key Settings
                 </Button>

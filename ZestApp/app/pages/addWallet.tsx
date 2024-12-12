@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {Stack, useNavigation, useRouter} from 'expo-router';
+import {Stack, useLocalSearchParams, useNavigation, useRouter} from 'expo-router';
 import {TextInput, Button, Text, useTheme, Surface} from 'react-native-paper';
 import {Picker} from "@react-native-picker/picker";
 import * as SecureStore from 'expo-secure-store';
+import {getWalletInfoMnemonic} from "@/app/wallet-import";
+import {Wallet, WalletInfo} from "@/models/models";
 
 const generateBitcoinAddress = (): string => {
     const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -21,16 +23,22 @@ export default function AddWallet() {
     const navigation = useNavigation();
     const theme = useTheme();
     const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC");
+   const {mnemonic} = useLocalSearchParams<{mnemonic:string}>();
+
     const saveWallet = async () => {
         let storedWallets = await SecureStore.getItemAsync('wallets');
         const wallets = storedWallets ? JSON.parse(storedWallets) : [];
-
-        if (wallets.length === 3) {
-            wallets[2] = {id: "3", name: walletName, balance: Math.floor(Math.random()*100.000), network: walletNetwork};
-        } else {
-            wallets.push({id: (wallets.length + 1).toString(), name: walletName, balance: Math.floor(Math.random()*100.000), network: walletNetwork});
+        let walletInfo:WalletInfo = await getWalletInfoMnemonic(mnemonic)
+        let newWallet: Wallet = {
+            id: (wallets.length + 1).toString(),
+            name: walletName,
+            network: walletNetwork,
+            privateKey: walletInfo.privateKey,
+            address: walletInfo.address,
+            publicKey: walletInfo.publicKey
         }
-
+        console.log(newWallet)
+        wallets.push(newWallet);
         await SecureStore.setItemAsync('wallets', JSON.stringify(wallets));
         router.replace('/');
     };
