@@ -38,6 +38,11 @@ function createNewWallet() {
     return walletInfo
 }
 
+
+function generateMnemonic() {
+    return bip39.generateMnemonic();
+}
+
 async function getWalletInfoMnemonic(mnemonicPhrase: string) {
     const seed: Buffer = bip39.mnemonicToSeedSync(mnemonicPhrase);
     const root: BIP32Interface = bip32.fromSeed(seed, network);
@@ -76,7 +81,7 @@ const fetchBalanceFromPhase = async (mnemonicPhrase: string) => {
     return -1
 }
 
-export {createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase}
+export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase}
 
 /* Generated Address
 Mnemonic:  praise valley time inject leg vintage burst bottom unfair luggage mixed level
