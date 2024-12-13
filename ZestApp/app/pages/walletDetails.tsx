@@ -32,7 +32,7 @@ const mockCards: Cards[] = [
 ];
 
 export default function WalletDetails() {
-    const { selectedWalletId = 0 } = useLocalSearchParams<{ selectedWalletId: number }>();
+    const { selectedWalletId = 0 } = useLocalSearchParams();
 
     const wallet = mockCards.find((card) => card.id == selectedWalletId);
     const walletTransactions = mockAll.filter((transaction) => transaction.walletId == selectedWalletId);

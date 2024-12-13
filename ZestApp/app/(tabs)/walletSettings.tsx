@@ -3,6 +3,7 @@ import {StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Stack, useNavigation, useRouter} from 'expo-router';
 import {Provider as PaperProvider, Button, Appbar, useTheme} from 'react-native-paper';
+import * as SecureStore from 'expo-secure-store';
 
 export default function WalletSettings() {
     const router = useRouter();
@@ -21,7 +22,7 @@ export default function WalletSettings() {
                 <Button
                     mode="contained"
                     style={styles.button}
-                    onPress={() => router.push("/pages/privateKeySettings")}
+                    onPress={() => router.push("/pages/privateKeywords")}
                 >
                     Private Key Settings
                 </Button>
@@ -35,7 +36,10 @@ export default function WalletSettings() {
                 <Button
                     mode="contained"
                     style={styles.button}
-                    onPress={() => navigation.goBack()}
+                    onPress={() =>{
+                        SecureStore.deleteItemAsync('wallets').then(() => console.log('Wallets deleted'));
+                        router.back();
+                    }}
                 >
                     Delete This Wallet
                 </Button>

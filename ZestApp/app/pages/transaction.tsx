@@ -65,7 +65,7 @@ export default function Transaction() {
                         onValueChange={(itemValue) => setSelectedWalletId(itemValue)}
                     >
                         {mockCards.map((card) => (
-                            <Picker.Item key={card.id} label={card.name} value={card.id}/>
+                            <Picker.Item key={card.id} label={card.name} value={card.id.toString()}/>
                         ))}
                     </Picker>
                     <Text>Selected Wallet: {"Wallet " + selectedWalletId}</Text>
