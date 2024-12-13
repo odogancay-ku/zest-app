@@ -3,9 +3,11 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {Stack, useLocalSearchParams, useNavigation, useRouter} from 'expo-router';
 import {TextInput, Button, Text, useTheme, Surface} from 'react-native-paper';
 import {Picker} from "@react-native-picker/picker";
+import * as Clipboard from 'expo-clipboard';
 import * as SecureStore from 'expo-secure-store';
 import {getWalletInfoMnemonic} from "@/app/wallet-import";
 import {Wallet, WalletInfo} from "@/models/models";
+import {View, Alert} from "react-native";
 
 const generateBitcoinAddress = (): string => {
     const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -23,12 +25,12 @@ export default function AddWallet() {
     const navigation = useNavigation();
     const theme = useTheme();
     const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC");
-   const {mnemonic} = useLocalSearchParams<{mnemonic:string}>();
+    const {mnemonic='Insert mnemonic key'} = useLocalSearchParams<{ mnemonic?: string }>();
 
     const saveWallet = async () => {
         let storedWallets = await SecureStore.getItemAsync('wallets');
         const wallets = storedWallets ? JSON.parse(storedWallets) : [];
-        let walletInfo:WalletInfo = await getWalletInfoMnemonic(mnemonic)
+        let walletInfo: WalletInfo = await getWalletInfoMnemonic(mnemonic)
         let newWallet: Wallet = {
             id: (wallets.length + 1).toString(),
             name: walletName,
@@ -79,6 +81,18 @@ export default function AddWallet() {
                 </Picker>
                 <Text>Selected Currency: {selectedCurrency}</Text>
             </Surface>
+            <View>
+                <Text variant="titleMedium">Mnemonic Key is: </Text>
+                <Text variant="titleMedium" onPress={() => {
+                    Clipboard.setStringAsync(mnemonic);
+                    Alert.alert(
+                        'Success',
+                        'Mnemonic copied to clipboard!',
+                        [{text: 'OK'}]
+                    );
+                }}>{mnemonic}</Text>
+            </View>
+
 
             {/* Private Key Keywords Button */}
             <Button

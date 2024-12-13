@@ -3,6 +3,7 @@ import React, {useEffect, useState} from "react";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {TextInput, Button, Text, useTheme, Switch} from 'react-native-paper';
 import {ScrollView, View} from "react-native";
+import {generateMnemonic} from "@/app/wallet-import";
 
 export default function PrivateKeywords() {
     const [mnemonicPhrase, setMnemonicPhrase] = useState<string[]>(new Array(12).fill(''));
@@ -30,7 +31,7 @@ export default function PrivateKeywords() {
 
     const toggleSwitch = () => setInputType(previousState => !previousState);
     return (
-        <SafeAreaView style={{flex: 1, padding: 16, gap: 20, backgroundColor: theme.colors.background}}>
+        <SafeAreaView style={{flex: 1, padding: 16, gap: 5, backgroundColor: theme.colors.background}}>
             <Stack.Screen
                 options={{
                     title: 'Add private key info',
@@ -41,16 +42,19 @@ export default function PrivateKeywords() {
                     },
                 }}
             />
+            <View style={{marginBottom:15}}>
+                <Text variant="titleMedium">{inputType ? 'Mnemonic Phrase' : 'Private Key'}</Text>
+                <Switch onValueChange={toggleSwitch} value={inputType}/>
+            </View>
 
-            <Switch onValueChange={toggleSwitch} value={inputType}/>
-
-            <Text variant="titleMedium">Enter your mnemonic key keywords</Text>
+            <Text variant="titleMedium" style={{marginBottom:5}}>Enter your {inputType ? 'Mnemonic Phrase' : 'Private Key'}</Text>
             <View style={{flex: 1}}>
-                {inputType ? <ScrollView>
+                {inputType ? <View>
                         {mnemonicPhrase.map((keyword, index) => (
                             index % 2 === 0 && (
-                                <View key={index}>
+                                <View key={index} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                                     <TextInput
+                                        style={{flex: 1, marginRight: 8}}
                                         value={mnemonicPhrase[index]}
                                         onChangeText={(text) => {
                                             const newKeywords = [...mnemonicPhrase];
@@ -61,6 +65,7 @@ export default function PrivateKeywords() {
                                     />
                                     {index + 1 < mnemonicPhrase.length && (
                                         <TextInput
+                                            style={{flex: 1, marginLeft: 8}}
                                             value={mnemonicPhrase[index + 1]}
                                             onChangeText={(text) => {
                                                 const newKeywords = [...mnemonicPhrase];
@@ -73,11 +78,19 @@ export default function PrivateKeywords() {
                                 </View>
                             )
                         ))}
-                    </ScrollView> :
+
+                        <Button
+                            mode="contained"
+                            style={{marginTop: 16}}
+                            onPress={()=>setMnemonicPhrase(generateMnemonic().split(' '))}>
+                            <Text>Generate Mnemonic Key</Text>
+                        </Button>
+                    </View>
+                    :
                     <TextInput
                         value={key}
                         onChangeText={setKey}
-                        placeholder="Enter your mnemonic key"/>}
+                        placeholder="Enter your private key"/>}
             </View>
             <Button
                 mode="contained"
