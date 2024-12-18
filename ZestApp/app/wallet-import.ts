@@ -62,6 +62,7 @@ async function getWalletInfoMnemonic(mnemonicPhrase: string) {
 async function fetchBalance(address: string) {
     try {
         const response = await axios.get(`https://blockstream.info/testnet/api/address/${address}`);
+        console.log(response.data.mempool_stats.funded_txo_sum / 100000000);
         console.log("Balance:", response.data.chain_stats.funded_txo_sum / 100000000);
         return response.data.chain_stats.funded_txo_sum / 100000000;
     } catch (error) {
@@ -80,6 +81,8 @@ const fetchBalanceFromPhase = async (mnemonicPhrase: string) => {
     }
     return -1
 }
+
+
 
 export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase}
 
