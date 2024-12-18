@@ -24,7 +24,7 @@ export default function AddWallet() {
     const router = useRouter();
     const navigation = useNavigation();
     const theme = useTheme();
-    const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC");
+    const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC-Bitcoin");
     const {mnemonic='Insert mnemonic key'} = useLocalSearchParams<{ mnemonic?: string }>();
 
     const saveWallet = async () => {
@@ -76,8 +76,9 @@ export default function AddWallet() {
                     selectedValue={selectedCurrency}
                     onValueChange={(itemValue) => setSelectedCurrency(itemValue)}
                 >
-                    <Picker.Item label="BTC - Bitcoin" value="BTC"/>
-                    <Picker.Item label="ETH - Ethereum" value="ETH"/>
+                    <Picker.Item label="Bitcoin" value="BTC-Bitcoin"/>
+                    <Picker.Item label="Lightning" value="BTC-Lightning"/>
+                    <Picker.Item label="Citrea" value="CBTC"/>
                 </Picker>
                 <Text>Selected Currency: {selectedCurrency}</Text>
             </Surface>

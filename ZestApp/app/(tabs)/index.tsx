@@ -7,7 +7,7 @@ import Carousel from "react-native-snap-carousel";
 import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 import CircleButton from "@/app/widgets/CircleButton";
 import * as SecureStore from 'expo-secure-store';
-import {Wallet} from "@/models/models";
+import {WalletDisplay} from "@/models/models";
 import {fetchBalance} from "@/app/wallet-import";
 
 //TODO: remove the mock data
@@ -26,7 +26,7 @@ const mockAll: TransactionHistory[] = [
 ];
 
 export default function HomeScreen() {
-    const [wallets, setWallets] = useState<Wallet[]>([]);
+    const [wallets, setWallets] = useState<WalletDisplay[]>([]);
     const [selectedWalletIndex, setSelectedWalletIndex] = useState<number>(0);
     const router = useRouter();
     const theme = useTheme();
@@ -40,16 +40,20 @@ export default function HomeScreen() {
                 router.push('/pages/addWallet');
                 return;
             }
-            setWallets(JSON.parse(storedWallets));
-            console.log("\nfetching Balances:\n")
-            for (let i = 0; i < wallets.length; i++) {
-                let wallet = wallets[i];
-                let balance = await fetchBalance(wallet.address);
-               console.log(balance);
-            }
+            const parsedWallets = JSON.parse(storedWallets);
+
+            const updatedWallets = await Promise.all(
+                parsedWallets.map(async (wallet: { address: string; }) => {
+                    const balance = await fetchBalance(wallet.address);
+                    return {...wallet, balance};
+                })
+            );
+
+            setWallets(updatedWallets);
         };
-        fetchWallets()
+        fetchWallets();
     }, []));
+
 
     const filteredTransactions = mockAll.filter(transaction => transaction.walletId === wallets[selectedWalletIndex]?.id);
 
@@ -83,7 +87,7 @@ export default function HomeScreen() {
                             }}>
                                 <Card.Content style={{height: '100%'}}>
                                     <Text variant="headlineSmall">{item.name}</Text>
-                                    <Text>Add balances</Text>
+                                    <Text>{item.balance}</Text>
                                 </Card.Content>
                             </Card>
                         </TouchableOpacity>

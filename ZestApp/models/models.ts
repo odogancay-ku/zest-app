@@ -6,6 +6,16 @@ interface Wallet {
     address: string;
     publicKey: string;
 }
+
+
+interface WalletDisplay {
+    id: string;
+    name: string;
+    network: string;
+    address: string;
+    balance: number;
+}
+
 interface WalletInfo{
     mnemonic: string,
     address: string,
