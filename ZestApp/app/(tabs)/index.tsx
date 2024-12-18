@@ -88,6 +88,7 @@ export default function HomeScreen() {
                                 <Card.Content style={{height: '100%'}}>
                                     <Text variant="headlineSmall">{item.name}</Text>
                                     <Text>{item.balance}</Text>
+                                    <Text>{item.network}</Text>
                                 </Card.Content>
                             </Card>
                         </TouchableOpacity>
