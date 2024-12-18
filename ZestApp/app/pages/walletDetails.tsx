@@ -5,20 +5,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, Card, Divider, useTheme } from "react-native-paper";
 import * as SecureStore from "expo-secure-store";
 import { fetchBalance } from "@/app/wallet-import";
+import {TransactionHistory} from "@/models/models";
 
-interface TransactionHistory {
-    id: number;
-    walletId: string;
-    amount: number;
-    date: string;
-    type: string;
-}
 
 const mockAll: TransactionHistory[] = [
-    { id: 1, walletId: "1", amount: 100, date: "2021-09-01", type: "deposit" },
-    { id: 2, walletId: "1", amount: 200, date: "2021-09-02", type: "withdraw" },
-    { id: 3, walletId: "2", amount: 300, date: "2021-09-03", type: "deposit" },
-    { id: 4, walletId: "3", amount: 400, date: "2021-09-04", type: "withdraw" },
+    { walletId: "1", amount: 100, date: "2021-09-01", type: "deposit" },
+    { walletId: "1", amount: 200, date: "2021-09-02", type: "withdraw" },
+    { walletId: "2", amount: 300, date: "2021-09-03", type: "deposit" },
+    { walletId: "3", amount: 400, date: "2021-09-04", type: "withdraw" },
 ];
 
 export default function WalletDetails() {
@@ -95,7 +89,7 @@ export default function WalletDetails() {
                         {walletTransactions.length > 0 ? (
                             walletTransactions.map((transaction) => (
                                 <View
-                                    key={transaction.id}
+                                    key={transaction.walletId}
                                     style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}
                                 >
                                     <Text>{transaction.date}</Text>
