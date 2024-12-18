@@ -20,11 +20,10 @@ const generateBitcoinAddress = (): string => {
 
 export default function AddWallet() {
     const [walletName, setWalletName] = useState('');
-    const [walletNetwork, setWalletNetwork] = useState('');
     const router = useRouter();
     const navigation = useNavigation();
     const theme = useTheme();
-    const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC-Bitcoin");
+    const [walletNetwork, setSelectedCurrency] = useState<string>("BTC-Bitcoin");
     const {mnemonic='Insert mnemonic key'} = useLocalSearchParams<{ mnemonic?: string }>();
 
     const saveWallet = async () => {
@@ -73,14 +72,14 @@ export default function AddWallet() {
             <Surface style={{padding: 16, elevation: 2}}>
                 <Text variant="headlineSmall">Choose Currency</Text>
                 <Picker
-                    selectedValue={selectedCurrency}
+                    selectedValue={walletNetwork}
                     onValueChange={(itemValue) => setSelectedCurrency(itemValue)}
                 >
                     <Picker.Item label="Bitcoin" value="BTC-Bitcoin"/>
                     <Picker.Item label="Lightning" value="BTC-Lightning"/>
-                    <Picker.Item label="Citrea" value="CBTC"/>
+                    <Picker.Item label="Citrea" value="CBTC-Citrea"/>
                 </Picker>
-                <Text>Selected Currency: {selectedCurrency}</Text>
+                <Text>Selected Currency: {walletNetwork}</Text>
             </Surface>
             <View>
                 <Text variant="titleMedium">Mnemonic Key is: </Text>

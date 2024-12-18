@@ -79,7 +79,7 @@ export default function HomeScreen() {
                         <TouchableOpacity
                             onPress={() => router.push({
                                 pathname: '/pages/walletDetails',
-                                params: {selectedWalletIndex: index}
+                                params: {selectedWalletId: item.id}
                             })}
                         >
                             <Card style={{

@@ -23,4 +23,11 @@ interface WalletInfo{
     publicKey: string
 }
 
-export { Wallet ,WalletInfo};
+interface TransactionHistory {
+    walletId: string;
+    amount: number;
+    date: string;
+    type: string;
+}
+
+export { Wallet, WalletDisplay, WalletInfo, TransactionHistory};
