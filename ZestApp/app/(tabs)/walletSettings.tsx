@@ -37,16 +37,6 @@ export default function WalletSettings() {
                 >
                     Add New Wallet
                 </Button>
-                <Button
-                    mode="contained"
-                    style={styles.button}
-                    onPress={() =>{
-                        SecureStore.deleteItemAsync('wallets').then(() => console.log('Wallets deleted'));
-                        router.back();
-                    }}
-                >
-                    Delete This Wallet
-                </Button>
             </View>
         </SafeAreaView>
     );
