@@ -1,3 +1,4 @@
+import '@/app/shims'
 import React, {useEffect, useState} from 'react';
 import {Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid, RefreshControl} from 'react-native';
 import {Link, useFocusEffect, useRouter} from "expo-router";
