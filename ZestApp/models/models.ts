@@ -24,6 +24,7 @@ interface WalletInfo{
 }
 
 interface TransactionHistory {
+    id: number;
     walletId: string;
     amount: number;
     date: string;
