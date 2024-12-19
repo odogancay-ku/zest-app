@@ -6,6 +6,16 @@ interface Wallet {
     address: string;
     publicKey: string;
 }
+
+
+interface WalletDisplay {
+    id: string;
+    name: string;
+    network: string;
+    address: string;
+    balance: number;
+}
+
 interface WalletInfo{
     mnemonic: string,
     address: string,
@@ -13,4 +23,12 @@ interface WalletInfo{
     publicKey: string
 }
 
-export { Wallet ,WalletInfo};
+interface TransactionHistory {
+    id: number;
+    walletId: string;
+    amount: number;
+    date: string;
+    type: string;
+}
+
+export { Wallet, WalletDisplay, WalletInfo, TransactionHistory};

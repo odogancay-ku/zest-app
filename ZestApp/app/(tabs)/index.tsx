@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, ScrollView, TouchableOpacity, View} from 'react-native';
+import {Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid} from 'react-native';
 import {Link, useFocusEffect, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Card, Text, IconButton, Divider, useTheme} from 'react-native-paper';
@@ -7,10 +7,10 @@ import Carousel from "react-native-snap-carousel";
 import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 import CircleButton from "@/app/widgets/CircleButton";
 import * as SecureStore from 'expo-secure-store';
-import {Wallet} from "@/models/models";
+import {WalletDisplay} from "@/models/models";
 import {fetchBalance} from "@/app/wallet-import";
 
-//TODO: remove the mock data
+// Mock Data for Transactions
 interface TransactionHistory {
     walletId: string;
     amount: number;
@@ -26,32 +26,39 @@ const mockAll: TransactionHistory[] = [
 ];
 
 export default function HomeScreen() {
-    const [wallets, setWallets] = useState<Wallet[]>([]);
+    const [wallets, setWallets] = useState<WalletDisplay[]>([]);
     const [selectedWalletIndex, setSelectedWalletIndex] = useState<number>(0);
     const router = useRouter();
     const theme = useTheme();
 
-    useFocusEffect( React.useCallback(() => {
+    useFocusEffect(React.useCallback(() => {
         const fetchWallets = async () => {
             const storedWallets = await SecureStore.getItemAsync('wallets');
-            console.log(storedWallets);
             if (!storedWallets) {
-                setWallets([]); //to make it more consistent
+                setWallets([]);
                 router.push('/pages/addWallet');
                 return;
             }
-            setWallets(JSON.parse(storedWallets));
-            console.log("\nfetching Balances:\n")
-            for (let i = 0; i < wallets.length; i++) {
-                let wallet = wallets[i];
-                let balance = await fetchBalance(wallet.address);
-               console.log(balance);
-            }
+            const parsedWallets = JSON.parse(storedWallets);
+
+            const updatedWallets = await Promise.all(
+                parsedWallets.map(async (wallet: { address: string; }) => {
+                    const balance = await fetchBalance(wallet.address);
+                    return {...wallet, balance};
+                })
+            );
+
+            setWallets(updatedWallets);
         };
-        fetchWallets()
+        fetchWallets();
     }, []));
 
     const filteredTransactions = mockAll.filter(transaction => transaction.walletId === wallets[selectedWalletIndex]?.id);
+
+    const copyToClipboard = (text: string) => {
+        Clipboard.setString(text);
+        ToastAndroid.show('Address copied to clipboard!', ToastAndroid.SHORT);
+    };
 
     return (
         <SafeAreaView style={{flexDirection: "column", gap: 10, padding: 10, backgroundColor: theme.colors.background}}>
@@ -75,15 +82,20 @@ export default function HomeScreen() {
                         <TouchableOpacity
                             onPress={() => router.push({
                                 pathname: '/pages/walletDetails',
-                                params: {selectedWalletIndex: index}
+                                params: {selectedWalletId: item.id}
                             })}
                         >
-                            <Card style={{
-                                height: 200, backgroundColor: theme.colors.primaryContainer
-                            }}>
-                                <Card.Content style={{height: '100%'}}>
-                                    <Text variant="headlineSmall">{item.name}</Text>
-                                    <Text>Add balances</Text>
+                            <Card style={{height: 200, backgroundColor: theme.colors.primaryContainer, paddingVertical: 10}}>
+                                <Card.Content style={{height: '100%', justifyContent: 'space-between'}}>
+                                    <Text variant="headlineSmall" style={{fontSize: 20}}>{item.name}</Text>
+                                    <Text style={{fontSize: 14}}>Balance: {item.balance}</Text>
+                                    <Text style={{fontSize: 14}}>Network: {item.network}</Text>
+                                    <Text
+                                        style={{fontSize: 12}}
+                                        onPress={() => copyToClipboard(item.address)}
+                                    >
+                                        Address: {item.address} 📋
+                                    </Text>
                                 </Card.Content>
                             </Card>
                         </TouchableOpacity>
@@ -104,7 +116,6 @@ export default function HomeScreen() {
                             padding: 10
                         }}
                         showsHorizontalScrollIndicator={false}>
-
                 <Link href={{pathname: "/pages/atomicSwap"}} asChild>
                     <CircleButton>
                         <MaterialIcons name="currency-exchange" size={30} color="black"/>
@@ -134,10 +145,10 @@ export default function HomeScreen() {
                             borderBottomWidth: 1,
                             borderColor: '#eee'
                         }}>
-                            <Text style={{flex: 1}}>{transaction.walletId}</Text>
-                            <Text style={{flex: 1}}>{transaction.amount}</Text>
-                            <Text style={{flex: 1}}>{transaction.date}</Text>
-                            <Text style={{flex: 1}}>{transaction.type}</Text>
+                            <Text style={{flex: 1, fontSize: 16}}>{transaction.walletId}</Text>
+                            <Text style={{flex: 1, fontSize: 16}}>{transaction.amount}</Text>
+                            <Text style={{flex: 1, fontSize: 16}}>{transaction.date}</Text>
+                            <Text style={{flex: 1, fontSize: 16}}>{transaction.type}</Text>
                         </View>
                     ))}
                 </ScrollView>

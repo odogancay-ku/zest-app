@@ -14,7 +14,6 @@ const network: bitcoin.Network = bitcoin.networks.testnet;
 
 function createNewWallet() {
     const mnemonic: string = bip39.generateMnemonic();
-    console.log("Mnemonic: ", mnemonic);
 
     const seed: Buffer = bip39.mnemonicToSeedSync(mnemonic);
     const root: BIP32Interface = bip32.fromSeed(seed, network);
@@ -25,9 +24,6 @@ function createNewWallet() {
     const {address = ''} = bitcoin.payments.p2wpkh({pubkey: pupKeyBuffer, network});
     const privateKey: string = keyPair.toWIF();
 
-    console.log("Public key: ", keyPair.publicKey.toString());
-    console.log("Address: ", address);
-    console.log("Private key: ", privateKey);
 
     let walletInfo: WalletInfo = {
         mnemonic: mnemonic,
@@ -62,7 +58,6 @@ async function getWalletInfoMnemonic(mnemonicPhrase: string) {
 async function fetchBalance(address: string) {
     try {
         const response = await axios.get(`https://blockstream.info/testnet/api/address/${address}`);
-        console.log("Balance:", response.data.chain_stats.funded_txo_sum / 100000000);
         return response.data.chain_stats.funded_txo_sum / 100000000;
     } catch (error) {
         console.error("Error fetching balance:", error);

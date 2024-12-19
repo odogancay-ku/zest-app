@@ -9,6 +9,10 @@ export default function WalletSettings() {
     const router = useRouter();
     const navigation = useNavigation();
 
+    function deleteWallet() {
+
+    }
+
     return (
         <SafeAreaView style={{flex: 1, padding: 10, backgroundColor: useTheme().colors.background}}>
             <View style={{
@@ -32,16 +36,6 @@ export default function WalletSettings() {
                     onPress={() => router.push("/pages/addWallet")}
                 >
                     Add New Wallet
-                </Button>
-                <Button
-                    mode="contained"
-                    style={styles.button}
-                    onPress={() =>{
-                        SecureStore.deleteItemAsync('wallets').then(() => console.log('Wallets deleted'));
-                        router.back();
-                    }}
-                >
-                    Delete This Wallet
                 </Button>
             </View>
         </SafeAreaView>
