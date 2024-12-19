@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid} from 'react-native';
+import {Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid, RefreshControl} from 'react-native';
 import {Link, useFocusEffect, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Card, Text, IconButton, Divider, useTheme} from 'react-native-paper';
@@ -30,26 +30,34 @@ export default function HomeScreen() {
     const [selectedWalletIndex, setSelectedWalletIndex] = useState<number>(0);
     const router = useRouter();
     const theme = useTheme();
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const fetchWallets = async () => {
+        const storedWallets = await SecureStore.getItemAsync('wallets');
+        if (!storedWallets) {
+            setWallets([]);
+            router.push('/pages/addWallet');
+            return;
+        }
+        const parsedWallets = JSON.parse(storedWallets);
+
+        const updatedWallets = await Promise.all(
+            parsedWallets.map(async (wallet: { address: string; }) => {
+                const balance = await fetchBalance(wallet.address);
+                return {...wallet, balance};
+            })
+        );
+
+        setWallets(updatedWallets);
+    };
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        fetchWallets();
+        setRefreshing(false);
+    }, [])
 
     useFocusEffect(React.useCallback(() => {
-        const fetchWallets = async () => {
-            const storedWallets = await SecureStore.getItemAsync('wallets');
-            if (!storedWallets) {
-                setWallets([]);
-                router.push('/pages/addWallet');
-                return;
-            }
-            const parsedWallets = JSON.parse(storedWallets);
-
-            const updatedWallets = await Promise.all(
-                parsedWallets.map(async (wallet: { address: string; }) => {
-                    const balance = await fetchBalance(wallet.address);
-                    return {...wallet, balance};
-                })
-            );
-
-            setWallets(updatedWallets);
-        };
         fetchWallets();
     }, []));
 
@@ -61,98 +69,106 @@ export default function HomeScreen() {
     };
 
     return (
-        <SafeAreaView style={{flexDirection: "column", gap: 10, padding: 10, backgroundColor: theme.colors.background}}>
-            <Carousel
-                data={[...wallets, {id: "", name: "Add Wallet", balance: 0}]}
-                renderItem={({item, index}) => (
-                    item.id === "" ? (
-                        <Card
-                            style={{height: 200, backgroundColor: theme.colors.primaryContainer}}
-                            onPress={() => router.push('/pages/addWallet')}
-                        >
-                            <Card.Content style={{alignItems: 'center', justifyContent: 'center', height: '100%'}}>
-                                <IconButton
-                                    icon="plus"
-                                    size={40}
-                                    style={{borderWidth: 1, backgroundColor: theme.colors.onPrimary}}
-                                />
-                            </Card.Content>
-                        </Card>
-                    ) : (
-                        <TouchableOpacity
-                            onPress={() => router.push({
-                                pathname: '/pages/walletDetails',
-                                params: {selectedWalletId: item.id}
-                            })}
-                        >
-                            <Card style={{height: 200, backgroundColor: theme.colors.primaryContainer, paddingVertical: 10}}>
-                                <Card.Content style={{height: '100%', justifyContent: 'space-between'}}>
-                                    <Text variant="headlineSmall" style={{fontSize: 20}}>{item.name}</Text>
-                                    <Text style={{fontSize: 14}}>Balance: {item.balance}</Text>
-                                    <Text style={{fontSize: 14}}>Network: {item.network}</Text>
-                                    <Text
-                                        style={{fontSize: 12}}
-                                        onPress={() => copyToClipboard(item.address)}
-                                    >
-                                        Address: {item.address} 📋
-                                    </Text>
+        <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
+            <ScrollView style={{flex: 1, flexDirection: "column", gap: 10, padding: 10, backgroundColor: theme.colors.background}}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}>
+                <Carousel
+                    data={[...wallets, {id: "", name: "Add Wallet", balance: 0}]}
+                    renderItem={({item, index}) => (
+                        item.id === "" ? (
+                            <Card
+                                style={{height: 200, backgroundColor: theme.colors.primaryContainer}}
+                                onPress={() => router.push('/pages/addWallet')}
+                            >
+                                <Card.Content style={{alignItems: 'center', justifyContent: 'center', height: '100%'}}>
+                                    <IconButton
+                                        icon="plus"
+                                        size={40}
+                                        style={{borderWidth: 1, backgroundColor: theme.colors.onPrimary}}
+                                    />
                                 </Card.Content>
                             </Card>
-                        </TouchableOpacity>
-                    )
-                )}
-                sliderWidth={Dimensions.get("screen").width}
-                itemWidth={Dimensions.get("screen").width * 0.8}
-                vertical={false}
-                onScrollIndexChanged={(index) => {
-                    setSelectedWalletIndex(index);
-                }}
-            />
+                        ) : (
+                            <TouchableOpacity
+                                onPress={() => router.push({
+                                    pathname: '/pages/walletDetails',
+                                    params: {selectedWalletId: item.id}
+                                })}
+                            >
+                                <Card style={{
+                                    height: 200,
+                                    backgroundColor: theme.colors.primaryContainer,
+                                    paddingVertical: 10
+                                }}>
+                                    <Card.Content style={{height: '100%', justifyContent: 'space-between'}}>
+                                        <Text variant="headlineSmall" style={{fontSize: 20}}>{item.name}</Text>
+                                        <Text style={{fontSize: 14}}>Balance: {item.balance}</Text>
+                                        <Text style={{fontSize: 14}}>Network: {item.network}</Text>
+                                        <Text
+                                            style={{fontSize: 12}}
+                                            onPress={() => copyToClipboard(item.address)}
+                                        >
+                                            Address: {item.address} 📋
+                                        </Text>
+                                    </Card.Content>
+                                </Card>
+                            </TouchableOpacity>
+                        )
+                    )}
+                    sliderWidth={Dimensions.get("screen").width}
+                    itemWidth={Dimensions.get("screen").width * 0.8}
+                    vertical={false}
+                    onScrollIndexChanged={(index) => {
+                        setSelectedWalletIndex(index);
+                    }}
+                />
 
-            <ScrollView horizontal={true} style={{height: 100, width: '100%'}}
-                        contentContainerStyle={{
-                            flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-                            gap: 30,
-                            padding: 10
-                        }}
-                        showsHorizontalScrollIndicator={false}>
-                <Link href={{pathname: "/pages/atomicSwap"}} asChild>
-                    <CircleButton>
-                        <MaterialIcons name="currency-exchange" size={30} color="black"/>
-                    </CircleButton>
-                </Link>
-                <Link href={{pathname: "/pages/transaction"}} asChild>
-                    <CircleButton>
-                        <FontAwesome6 name="money-bill-transfer" size={30} color="black"/>
-                    </CircleButton>
-                </Link>
-                <Link href={{pathname: "/pages/walletDetails", params: {selectedWalletIndex}}} asChild>
-                    <CircleButton>
-                        <MaterialCommunityIcons name="card-account-details" size={30} color="black"/>
-                    </CircleButton>
-                </Link>
-            </ScrollView>
-
-            <Card style={{padding: 10}}>
-                <Card.Title title="Transaction History"/>
-                <Divider/>
-                <ScrollView>
-                    {filteredTransactions.map((transaction) => (
-                        <View key={transaction.date} style={{
-                            flexDirection: 'row',
-                            paddingVertical: 10,
-                            paddingHorizontal: 5,
-                            borderBottomWidth: 1,
-                            borderColor: '#eee'
-                        }}>
-                            <Text style={{flex: 1, fontSize: 16}}>{transaction.walletId}</Text>
-                            <Text style={{flex: 1, fontSize: 16}}>{transaction.amount}</Text>
-                            <Text style={{flex: 1, fontSize: 16}}>{transaction.date}</Text>
-                            <Text style={{flex: 1, fontSize: 16}}>{transaction.type}</Text>
-                        </View>
-                    ))}
+                <ScrollView horizontal={true} style={{height: 100, width: '100%'}}
+                            contentContainerStyle={{
+                                flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+                                gap: 30,
+                                padding: 10
+                            }}
+                            showsHorizontalScrollIndicator={false}>
+                    <Link href={{pathname: "/pages/atomicSwap"}} asChild>
+                        <CircleButton>
+                            <MaterialIcons name="currency-exchange" size={30} color="black"/>
+                        </CircleButton>
+                    </Link>
+                    <Link href={{pathname: "/pages/transaction"}} asChild>
+                        <CircleButton>
+                            <FontAwesome6 name="money-bill-transfer" size={30} color="black"/>
+                        </CircleButton>
+                    </Link>
+                    <Link href={{pathname: "/pages/walletDetails", params: {selectedWalletIndex}}} asChild>
+                        <CircleButton>
+                            <MaterialCommunityIcons name="card-account-details" size={30} color="black"/>
+                        </CircleButton>
+                    </Link>
                 </ScrollView>
-            </Card>
+
+                <Card style={{padding: 10}}>
+                    <Card.Title title="Transaction History"/>
+                    <Divider/>
+                    <ScrollView>
+                        {filteredTransactions.map((transaction) => (
+                            <View key={transaction.date} style={{
+                                flexDirection: 'row',
+                                paddingVertical: 10,
+                                paddingHorizontal: 5,
+                                borderBottomWidth: 1,
+                                borderColor: '#eee'
+                            }}>
+                                <Text style={{flex: 1, fontSize: 16}}>{transaction.walletId}</Text>
+                                <Text style={{flex: 1, fontSize: 16}}>{transaction.amount}</Text>
+                                <Text style={{flex: 1, fontSize: 16}}>{transaction.date}</Text>
+                                <Text style={{flex: 1, fontSize: 16}}>{transaction.type}</Text>
+                            </View>
+                        ))}
+                    </ScrollView>
+                </Card>
+            </ScrollView>
         </SafeAreaView>
     );
 }

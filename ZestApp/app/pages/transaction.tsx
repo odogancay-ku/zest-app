@@ -28,6 +28,7 @@ export default function Transaction() {
                 console.log(wallet.address, " ", balance);
             }
             setWallets(wallets);
+            setSelectedWalletId(wallets[0].id);
         } else {
             console.log("No wallets found.");
             setWallets([]);
@@ -49,7 +50,7 @@ export default function Transaction() {
 
         try {
             // Fetch UTXOs
-            const utxoResponse = await axios.get(`https://blockstream.info/api/address/${address}/utxo`);
+            const utxoResponse = await axios.get(`https://blockstream.info/testnet/api/address/${address}/utxo`);
             const utxos = utxoResponse.data;
 
             if (utxos.length === 0) {
