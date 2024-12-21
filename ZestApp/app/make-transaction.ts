@@ -1,24 +1,9 @@
 import './shims';
 import axios from "axios";
 import * as Bitcoin from 'bitcoinjs-lib'
-import {Wallet} from "@/models/models";
+import {UTXOResponse, Wallet} from "@/models/models";
 import {PsbtInputExtended} from "bip174/src/lib/interfaces";
 
-interface UTXO {
-    txid: string;
-    vout: number;
-    value: number;
-    status: {
-        confirmed: boolean;
-        block_height: number;
-        block_hash: string;
-        block_time: number;
-    }
-}
-
-interface UTXOResponse {
-    data: UTXO[];
-}
 
 async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddress: string) {
 

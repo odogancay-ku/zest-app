@@ -30,5 +30,20 @@ interface TransactionHistory {
     date: string;
     type: string;
 }
+interface UTXO {
+    txid: string;
+    vout: number;
+    value: number;
+    status: {
+        confirmed: boolean;
+        block_height: number;
+        block_hash: string;
+        block_time: number;
+    }
+}
 
-export { Wallet, WalletDisplay, WalletInfo, TransactionHistory};
+interface UTXOResponse {
+    data: UTXO[];
+}
+
+export { Wallet, WalletDisplay, WalletInfo, TransactionHistory,UTXOResponse,UTXO};

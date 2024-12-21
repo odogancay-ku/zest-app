@@ -5,7 +5,7 @@ import * as bip39 from 'bip39';
 import {BIP32Factory, BIP32Interface} from 'bip32';
 import {Buffer} from 'buffer';
 import axios from 'axios'
-import {WalletInfo} from "@/models/models";
+import {UTXOResponse, WalletInfo} from "@/models/models";
 
 const bip32 = BIP32Factory(ecc);
 
@@ -57,8 +57,12 @@ async function getWalletInfoMnemonic(mnemonicPhrase: string) {
 
 async function fetchBalance(address: string) {
     try {
-        const response = await axios.get(`https://blockstream.info/testnet/api/address/${address}`);
-        return response.data.chain_stats.funded_txo_sum / 100000000;
+        const response:UTXOResponse = await axios.get(`https://blockstream.info/testnet/api/address/${address}/utxo`);
+        let balance = 0;
+        for (let utxo of response.data) {
+            balance += utxo.value;
+        }
+        return balance / 100000000;
     } catch (error) {
         console.error("Error fetching balance:", error);
     }
