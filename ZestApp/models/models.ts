@@ -1,17 +1,20 @@
+import {WalletNetwork} from "@/constants/Enums";
+
 interface Wallet {
     id: string;
     name: string;
-    network: string;
+    network: WalletNetwork;
     privateKey: string;
     address: string;
     publicKey: string;
+    balance: number;
 }
 
 
 interface WalletDisplay {
     id: string;
     name: string;
-    network: string;
+    network: WalletNetwork;
     address: string;
     balance: number;
 }

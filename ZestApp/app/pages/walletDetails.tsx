@@ -5,7 +5,7 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {Text, Card, Divider, Button, useTheme} from "react-native-paper";
 import * as SecureStore from "expo-secure-store";
 import {fetchBalance} from "@/app/wallet-import";
-import {TransactionHistory} from "@/models/models";
+import {TransactionHistory, Wallet} from "@/models/models";
 import LoadingOverlay from "@/app/widgets/LoadingOverlay"; // Adjust the import path as needed
 
 const mockAll: TransactionHistory[] = [
@@ -17,7 +17,7 @@ const mockAll: TransactionHistory[] = [
 
 export default function WalletDetails() {
     const {selectedWalletId = 0} = useLocalSearchParams();
-    const [wallet, setWallet] = useState(null);
+    const [wallet, setWallet] = useState<Wallet | null>(null);
     const [walletTransactions, setWalletTransactions] = useState<TransactionHistory[]>([]);
     const [loading, setLoading] = useState(true); // Loading state
     const theme = useTheme();
@@ -38,8 +38,11 @@ export default function WalletDetails() {
                 const selectedWallet = parsedWallets.find((w: { id: string }) => w.id == selectedWalletId);
 
                 if (selectedWallet) {
-                    const balance = await fetchBalance(selectedWallet.address);
-                    setWallet({...selectedWallet, balance});
+                    console.log("selectedWallet", selectedWallet);
+                    const balance = await fetchBalance(selectedWallet.address, selectedWallet.network);
+                    console.log("balance", balance);
+                    const wallet = {...selectedWallet, balance};
+                    setWallet(wallet);
                     const filteredTransactions = mockAll.filter(
                         (transaction) => transaction.walletId === selectedWalletId
                     );
