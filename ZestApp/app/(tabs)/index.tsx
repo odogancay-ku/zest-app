@@ -7,8 +7,10 @@ import Carousel from "react-native-snap-carousel";
 import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 import CircleButton from "@/app/widgets/CircleButton";
 import * as SecureStore from 'expo-secure-store';
-import {WalletDisplay} from "@/models/models";
+import {Wallet, WalletDisplay} from "@/models/models";
 import {fetchBalance} from "@/app/wallet-import";
+import {WalletNetwork} from "@/constants/Enums";
+import {address} from "bitcoinjs-lib";
 
 // Mock Data for Transactions
 interface TransactionHistory {
@@ -42,8 +44,8 @@ export default function HomeScreen() {
             const parsedWallets = JSON.parse(storedWallets);
 
             const updatedWallets = await Promise.all(
-                parsedWallets.map(async (wallet: { address: string; }) => {
-                    const balance = await fetchBalance(wallet.address);
+                parsedWallets.map(async (wallet: { address: string, network: WalletNetwork; }) => {
+                    const balance = await fetchBalance(wallet.address, wallet.network);
                     return {...wallet, balance};
                 })
             );
@@ -63,7 +65,7 @@ export default function HomeScreen() {
     return (
         <SafeAreaView style={{flexDirection: "column", gap: 10, padding: 10, backgroundColor: theme.colors.background}}>
             <Carousel
-                data={[...wallets, {id: "", name: "Add Wallet", balance: 0}]}
+                data={[...wallets, {id: "", name: "Add Wallet", balance: 0, network: WalletNetwork.Bitcoin, address: ""}]}
                 renderItem={({item, index}) => (
                     item.id === "" ? (
                         <Card
