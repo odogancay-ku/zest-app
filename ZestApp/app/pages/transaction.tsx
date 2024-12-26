@@ -20,9 +20,10 @@ export default function Transaction() {
         const storedWallets = await SecureStore.getItemAsync("wallets");
 
         if (storedWallets) {
-            const wallets = JSON.parse(storedWallets);
+            const wallets:Wallet[] = JSON.parse(storedWallets);
+            console.log("Wallets found:", wallets);
             for (let wallet of wallets) {
-                const balance = await fetchBalance(wallet.address);
+                const balance = await fetchBalance(wallet.address,wallet.network);
                 console.log(wallet.address, " ", balance);
             }
             setWallets(wallets);
@@ -45,7 +46,6 @@ export default function Transaction() {
         }
 
         await makeTransaction(selectedWallet, value, receiverWalletAddress);
-
     };
 
     return (

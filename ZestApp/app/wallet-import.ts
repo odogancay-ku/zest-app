@@ -5,11 +5,9 @@ import * as bip39 from 'bip39';
 import {BIP32Factory, BIP32Interface} from 'bip32';
 import {Buffer} from 'buffer';
 import axios from 'axios'
-import {WalletInfo} from "@/models/models";
 import {ethers} from "ethers";
 import {WalletNetwork} from "@/constants/Enums";
-
-import {UTXOResponse, WalletInfo} from "@/models/models";
+import {AddressInfo, WalletInfo} from "@/models/models";
 
 const bip32 = BIP32Factory(ecc);
 
@@ -75,32 +73,26 @@ async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<Walle
     const address = wallet.address;
     const publicKey = wallet.address;
 
-    const walletInfo: WalletInfo = {
+    return {
         mnemonic: "", // Mnemonic is not available when deriving from private key
         address: address,
         privateKey: privateKey,
         publicKey: publicKey
     };
-
-    return walletInfo;
 }
 
 async function fetchBalance(address: string, network: WalletNetwork) {
     try {
         console.log("fetching balance for address", address, "and network", network);
         if(network === WalletNetwork.Bitcoin) {
-            const response = await axios.get(`https://blockstream.info/testnet/api/address/${address}`);
-            return response.data.chain_stats.funded_txo_sum / 100000000;
+            const response= await axios.get(`https://blockstream.info/testnet/api/address/${address}`);
+            const data:AddressInfo = response.data;
+            const remaining = data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum;
+            return remaining/100000000;
         } else {
             const response = await axios.get(`https://explorer.testnet.citrea.xyz/api/v2/addresses/${address}`);
             return response.data.coin_balance / 100000000;
         }
-        const response:UTXOResponse = await axios.get(`https://blockstream.info/testnet/api/address/${address}/utxo`);
-        let balance = 0;
-        for (let utxo of response.data) {
-            balance += utxo.value;
-        }
-        return balance / 100000000;
     } catch (error) {
         console.error("Error fetching balance:", error);
     }
@@ -120,7 +112,7 @@ const fetchBalanceFromPhase = async (mnemonicPhrase: string) => {
 
 export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey}
 
-/* Generated Address
+/* Generated Address Wallet 1 BTC
 Mnemonic:  praise valley time inject leg vintage burst bottom unfair luggage mixed level
 Seed:  a2a60bdf1cfd5278c206ec9d7bd628ebe4a79dd8130841ecd0b20b4636b129fd88c33abf61d93d8ad564f787cab96034004be19a79bbfc9f8c9b955a7d12f3e4
 Root:  tprv8ZgxMBicQKsPdBEXp8UxdafPaVwBejRXfP8oUuuQ2A8HzqR42s6mn6zv1JXU4d8GhK4DhQsZpKQN9fTymXJA6YtRxhSFaVPRLR12KQqPvc5
@@ -132,4 +124,15 @@ Private key:  cQiNvLH95kBN3pcqMuEMFWvEJm9Zis5XKLwWxTUEzUvh21WMHJn7
 
 /* Refund to here
 tb1qerzrlxcfu24davlur5sqmgzzgsal6wusda40er
+ */
+
+/* Wallet 2 BTC
+mnemonic: custom ocean hint deal style amused pyramid bitter canal draw steak indoor
+tb1qqxqe6f08zsjz8j54duhwcfphctwq6qxunjmtpq
+ */
+
+
+/* Wallet 3 cBTC
+0xEda026247a58aFca8B98cEE391e7D72c25BC5A09
+
  */

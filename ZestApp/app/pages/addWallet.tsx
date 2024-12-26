@@ -28,11 +28,12 @@ export default function AddWallet() {
         setLoading(true); // Show loading spinner
         try {
             let storedWallets = await SecureStore.getItemAsync('wallets');
-            const wallets = storedWallets ? JSON.parse(storedWallets) : [];
+            const wallets:Wallet[] = storedWallets ? JSON.parse(storedWallets) : []; //may cause problem if there is not wallet maybe???
+            const new_id = wallets.reduce((maxId, wallet) => Math.max(maxId, parseInt(wallet.id)), 0) + 1;
             if (mnemonic) {
                 let walletInfo: WalletInfo = await getWalletInfoMnemonic(mnemonic);
                 let newWallet: Wallet = {
-                    id: (wallets.length + 1).toString(),
+                    id: new_id.toString(),
                     name: walletName,
                     network: walletNetwork,
                     privateKey: walletInfo.privateKey,
@@ -46,7 +47,7 @@ export default function AddWallet() {
             } else if (key) {
                 let walletInfo: WalletInfo = await getEthWalletInfoFromPrivateKey(key);
                 let newWallet: Wallet = {
-                    id: (wallets.length + 1).toString(),
+                    id: new_id.toString(),
                     name: walletName,
                     network: walletNetwork,
                     privateKey: walletInfo.privateKey,

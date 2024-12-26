@@ -3,6 +3,7 @@ import axios from "axios";
 import * as Bitcoin from 'bitcoinjs-lib'
 import {UTXOResponse, Wallet} from "@/models/models";
 import {PsbtInputExtended} from "bip174/src/lib/interfaces";
+import {bitcoin} from "bitcoinjs-lib/types/networks";
 
 
 async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddress: string) {
@@ -15,6 +16,7 @@ async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddr
         const { address, privateKey } = wallet;
 
         try {
+            console.log("address is :",address)
             // Fetch UTXOs
             const utxoResponse:UTXOResponse = await axios.get(`https://blockstream.info/testnet/api/address/${address}/utxo`);
             const utxos = utxoResponse.data;
@@ -66,6 +68,20 @@ async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddr
                 address: address,
                 value: change,
             })
+
+            /* Embed data in OP_RETURN output
+            const ethAddress = 'Eda026247a58aFca8B98cEE391e7D72c25BC5A09';
+            const opReturnData = Buffer.from(ethAddress, 'hex'); // Convert Ethereum address to buffer
+
+            const embed = Bitcoin.script.compile([
+                Bitcoin.opcodes.OP_RETURN,
+                opReturnData
+            ])
+            txb.addOutput({
+                script: embed,
+                value: 0
+            })
+             */
 
             // Sign the inputs
             const keyPair = Bitcoin.ECPair.fromWIF(privateKey, network);
