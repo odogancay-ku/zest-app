@@ -1,5 +1,6 @@
+import '@/app/shims'
 import React, {useEffect, useState} from 'react';
-import {Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid} from 'react-native';
+import {Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid, RefreshControl} from 'react-native';
 import {Link, useFocusEffect, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Card, Text, IconButton, Divider, useTheme} from 'react-native-paper';
@@ -32,26 +33,34 @@ export default function HomeScreen() {
     const [selectedWalletIndex, setSelectedWalletIndex] = useState<number>(0);
     const router = useRouter();
     const theme = useTheme();
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const fetchWallets = async () => {
+        const storedWallets = await SecureStore.getItemAsync('wallets');
+        if (!storedWallets) {
+            setWallets([]);
+            router.push('/pages/addWallet');
+            return;
+        }
+        const parsedWallets = JSON.parse(storedWallets);
+
+        const updatedWallets = await Promise.all(
+            parsedWallets.map(async (wallet: { address: string, network: WalletNetwork; }) => {
+                const balance = await fetchBalance(wallet.address, wallet.network);
+                return {...wallet, balance};
+            })
+        );
+
+        setWallets(updatedWallets);
+    };
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        fetchWallets();
+        setRefreshing(false);
+    }, [])
 
     useFocusEffect(React.useCallback(() => {
-        const fetchWallets = async () => {
-            const storedWallets = await SecureStore.getItemAsync('wallets');
-            if (!storedWallets) {
-                setWallets([]);
-                router.push('/pages/addWallet');
-                return;
-            }
-            const parsedWallets = JSON.parse(storedWallets);
-
-            const updatedWallets = await Promise.all(
-                parsedWallets.map(async (wallet: { address: string, network: WalletNetwork; }) => {
-                    const balance = await fetchBalance(wallet.address, wallet.network);
-                    return {...wallet, balance};
-                })
-            );
-
-            setWallets(updatedWallets);
-        };
         fetchWallets();
     }, []));
 
@@ -65,7 +74,13 @@ export default function HomeScreen() {
     return (
         <SafeAreaView style={{flexDirection: "column", gap: 10, padding: 10, backgroundColor: theme.colors.background}}>
             <Carousel
-                data={[...wallets, {id: "", name: "Add Wallet", balance: 0, network: WalletNetwork.Bitcoin, address: ""}]}
+                data={[...wallets, {
+                    id: "",
+                    name: "Add Wallet",
+                    balance: 0,
+                    network: WalletNetwork.Bitcoin,
+                    address: ""
+                }]}
                 renderItem={({item, index}) => (
                     item.id === "" ? (
                         <Card
@@ -87,7 +102,11 @@ export default function HomeScreen() {
                                 params: {selectedWalletId: item.id}
                             })}
                         >
-                            <Card style={{height: 200, backgroundColor: theme.colors.primaryContainer, paddingVertical: 10}}>
+                            <Card style={{
+                                height: 200,
+                                backgroundColor: theme.colors.primaryContainer,
+                                paddingVertical: 10
+                            }}>
                                 <Card.Content style={{height: '100%', justifyContent: 'space-between'}}>
                                     <Text variant="headlineSmall" style={{fontSize: 20}}>{item.name}</Text>
                                     <Text style={{fontSize: 14}}>Balance: {item.balance}</Text>
