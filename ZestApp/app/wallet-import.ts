@@ -77,12 +77,16 @@ async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<Walle
     // if (!ethers.isHexString(privateKey, 32)) {
     //     throw new Error("Invalid private key.");
     // }
-    const validPrivateKey = `0x${privateKey}`;
+    //if not hex string, convert to hex string
+    console.log("privateKey", privateKey);
+    if (!privateKey.startsWith("0x")) {
+        privateKey = `0x${privateKey}`;
+    }
 
-    const privateKeyBytes = ethers.hexlify(validPrivateKey);
+    const privateKeyBytes = ethers.hexlify(privateKey);
 
     // Create a wallet instance from the private key
-    const wallet = new ethers.Wallet(validPrivateKey);
+    const wallet = new ethers.Wallet(privateKey);
 
     // Derive wallet information
     const address = wallet.address;
@@ -95,6 +99,11 @@ async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<Walle
         privateKey: privateKey,
         publicKey: publicKey
     };
+}
+
+async function getEthWalletInfoFromMnemonic(mnemonic: string): Promise<WalletInfo> {
+    const wallet = ethers.Wallet.fromPhrase(mnemonic);
+    return  getEthWalletInfoFromPrivateKey(wallet.privateKey);
 }
 
 async function fetchBalance(address: string, network: WalletNetwork) {
@@ -126,7 +135,7 @@ const fetchBalanceFromPhase = async (mnemonicPhrase: string) => {
     return -1
 }
 
-export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey}
+export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey, getEthWalletInfoFromMnemonic}
 
 /* Generated Address Wallet 1 BTC
 Mnemonic:  praise valley time inject leg vintage burst bottom unfair luggage mixed level
