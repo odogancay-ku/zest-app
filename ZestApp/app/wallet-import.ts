@@ -30,12 +30,26 @@ function createNewWallet() {
     let walletInfo: WalletInfo = {
         mnemonic: mnemonic,
         address: address,
+        network: WalletNetwork.Bitcoin,
         privateKey: privateKey,
         publicKey: keyPair.publicKey.toString()
     }
     return walletInfo
 }
 
+function createNewWalletCitrea(): WalletInfo {
+    const mnemonicStr: string = bip39.generateMnemonic();
+    const wallet = ethers.Wallet.fromPhrase(mnemonicStr);
+
+    let walletInfo: WalletInfo = {
+        mnemonic: mnemonicStr,
+        address: wallet.address,
+        network: WalletNetwork.Citrea,
+        privateKey: wallet.privateKey,
+        publicKey: wallet.signingKey.publicKey
+    };
+    return walletInfo;
+}
 
 function generateMnemonic() {
     return bip39.generateMnemonic();
@@ -51,6 +65,7 @@ async function getWalletInfoMnemonic(mnemonicPhrase: string) {
     let walletInfo: WalletInfo = {
         mnemonic: mnemonicPhrase,
         address: address,
+        network: WalletNetwork.Bitcoin,
         privateKey: privateKey,
         publicKey: keyPair.publicKey.toString()
     }
@@ -76,6 +91,7 @@ async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<Walle
     return {
         mnemonic: "", // Mnemonic is not available when deriving from private key
         address: address,
+        network: WalletNetwork.Citrea,
         privateKey: privateKey,
         publicKey: publicKey
     };

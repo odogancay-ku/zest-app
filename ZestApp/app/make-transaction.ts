@@ -3,13 +3,18 @@ import axios from "axios";
 import * as Bitcoin from 'bitcoinjs-lib'
 import {UTXOResponse, Wallet} from "@/models/models";
 import {PsbtInputExtended} from "bip174/src/lib/interfaces";
-import {bitcoin} from "bitcoinjs-lib/types/networks";
+import {WalletNetwork} from "@/constants/Enums";
 
 
 async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddress: string) {
 
-    if (!wallet) {
+        if (!wallet) {
             alert("Wallet not selected or doesn't exist.");
+            return;
+        }
+
+        if (wallet.network === WalletNetwork.Citrea) {
+            makeTransactionCitrea(wallet, value, receiverWalletAddress);
             return;
         }
 
@@ -100,7 +105,7 @@ async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddr
             });
 
             alert(`Transaction sent! Txid: ${broadcastResponse.data}`);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error:", error);
             if (error.response) {
                 console.error("HTTP Status:", error.response.status);
@@ -112,5 +117,20 @@ async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddr
             }
         }
     };
+
+//Citrea make transaction
+function makeTransactionCitrea(wallet: Wallet, value: string, receiverWalletAddress: string) {
+
+    if (!wallet) {
+        alert("Wallet not selected or doesn't exist.");
+        return;
+    }
+    console.log("wallet", wallet);
+    console.log("value", value);
+    console.log("receiverWalletAddress", receiverWalletAddress);
+
+}
+
+
 
 export {makeTransaction};
