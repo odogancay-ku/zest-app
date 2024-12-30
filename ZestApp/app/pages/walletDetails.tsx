@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {ScrollView, View, Alert} from "react-native";
+import {ScrollView, View, Alert, Modal, StyleSheet, TouchableOpacity} from "react-native";
 import {Stack, useLocalSearchParams, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Text, Card, Divider, Button, useTheme} from "react-native-paper";
@@ -21,6 +21,7 @@ export default function WalletDetails() {
     const [wallet, setWallet] = useState<Wallet | null>(null);
     const [walletTransactions, setWalletTransactions] = useState<TransactionHistory[]>([]);
     const [loading, setLoading] = useState(true); // Loading state
+    const [qrModalVisible, setQrModalVisible] = useState(false); 
     const theme = useTheme();
     const router = useRouter();
 
@@ -92,6 +93,14 @@ export default function WalletDetails() {
         );
     };
 
+    const showQRCode = () => {
+        setQrModalVisible(true);
+    };
+
+    const closeQRCode = () => {
+        setQrModalVisible(false);
+    };
+
     return (
         <SafeAreaView style={{flex: 1, padding: 10, backgroundColor: theme.colors.background, gap: 20}}>
             <Stack.Screen
@@ -117,18 +126,6 @@ export default function WalletDetails() {
                             <Text>Network: {wallet.network}</Text>
                         </Card.Content>
                     </Card>
-
-
-                    <View>
-                        {selectedWalletId && (
-                            <QRCode
-                                value={selectedWalletId.toString()}
-                                bgColor={'#FFFFFF'}
-                                fgColor={'#000000'}
-                                size={256}
-                            />
-                        )}
-                    </View> 
                     
                     <Text variant="titleMedium">Transaction History</Text>
                     <Card mode="outlined" style={{flex: 1}}>
@@ -164,12 +161,58 @@ export default function WalletDetails() {
                             </ScrollView>
                         </Card.Content>
                     </Card>
-
-                    <View style={{marginTop: 20}}>
+                    <View style={{marginTop: 10}}>
+                        <Button mode="contained" color={theme.colors.error} onPress={showQRCode}>
+                            Show QR
+                        </Button>
+                    </View>
+                    <View style={{marginTop: 0}}>
                         <Button mode="contained" color={theme.colors.error} onPress={confirmDeleteWallet}>
                             Delete This Wallet
                         </Button>
                     </View>
+                    {/* Show QR Code */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={qrModalVisible}
+                        onRequestClose={closeQRCode}
+                    >
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        }}>
+                            <View style={{
+                                    width: 300,
+                                    backgroundColor: "white",
+                                    padding: 50,
+                                    borderRadius: 10,
+                                    alignItems: "center",
+                                    elevation: 5,
+                                }}>
+                                <View>
+                                    {selectedWalletId && (
+                                        <QRCode
+                                            value={wallet.address.toString()}
+                                            bgColor="#FFFFFF"
+                                            fgColor="#000000"
+                                            size={200}
+                                        />
+                                    )}
+                                </View>
+                                <TouchableOpacity style={{
+                                    marginTop: 20,
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    backgroundColor: "#2196F3",
+                                }} onPress={closeQRCode}>
+                                    <Text>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
                 </>
             ) : (
                 !loading && (

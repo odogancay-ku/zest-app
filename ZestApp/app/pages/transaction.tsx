@@ -8,8 +8,6 @@ import { Wallet } from "@/models/models";
 import { fetchBalance } from "@/app/wallet-import";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {makeTransaction} from "@/app/make-transaction";
-import { StyleSheet, View, Alert } from "react-native";
-import { CameraView, Camera } from "expo-camera";
 
 export default function Transaction() {
     const theme = useTheme();
@@ -17,9 +15,6 @@ export default function Transaction() {
     const [receiverWalletAddress, setReceiverWalletAddress] = useState<string>("");
     const [value, setValue] = useState<string>("");
     const [wallets, setWallets] = useState<Wallet[]>([]);
-    const [hasPermission, setHasPermission] = useState(null);
-    const [scanned, setScanned] = useState(false);
-    const [scanResult, setScanResult] = useState("");
 
     const fetchWallets = async () => {
         const storedWallets = await SecureStore.getItemAsync("wallets");
@@ -54,45 +49,8 @@ export default function Transaction() {
     };
 
 
-    useEffect(() => {
-        (async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setHasPermission(status === "granted");
-        })();
-    }, []);
-
-    const handleBarCodeScanned = ({ type, data }) => {
-        setScanned(true);
-        setScanResult(data);
-        Alert.alert(`QR Code Scanned!`, `Type: ${type}\nData: ${data}`);
-    };
-
-    if (hasPermission === null) {
-        console.log("Requesting for camera permission");
-    }
-    if (hasPermission === false) {
-        console.log("No access to camera");
-    }
-    console.log("Permission is: " + hasPermission);
-    console.log("Scanned is: " + scanned);
-    
-    return(
-        <View>
-        <CameraView
-          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-          barcodeScannerSettings={{
-            barcodeTypes: ["qr", "pdf417"],
-          }}
-          style={StyleSheet.absoluteFillObject}
-        />
-        {scanned && (
-          <Button onPress={() => setScanned(false)}>Tap to Scan Again</Button>
-        )}
-      </View>);
-
     return (
         <KeyboardAwareScrollView style={{ backgroundColor: theme.colors.background }}>
-            
             <Stack.Screen
                 options={{
                     title: "Transaction",

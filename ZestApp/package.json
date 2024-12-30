@@ -55,6 +55,7 @@
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "qr-scanner": "^1.4.2",
+    "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.3",
@@ -70,7 +71,8 @@
     "react-native-snap-carousel": "^4.0.0-beta.6",
     "react-native-web": "~0.19.10",
     "react-qr-code": "^2.0.15",
-    "readable-stream": "^4.5.2"
+    "readable-stream": "^4.5.2",
+    "sweetalert2": "^11.15.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
