@@ -97,6 +97,11 @@ async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<Walle
     };
 }
 
+async function getEthWalletInfoFromMnemonic(mnemonic: string): Promise<WalletInfo> {
+    const wallet = ethers.Wallet.fromPhrase(mnemonic);
+    return  getEthWalletInfoFromPrivateKey(wallet.privateKey);
+}
+
 async function fetchBalance(address: string, network: WalletNetwork) {
     try {
         console.log("fetching balance for address", address, "and network", network);
@@ -126,7 +131,7 @@ const fetchBalanceFromPhase = async (mnemonicPhrase: string) => {
     return -1
 }
 
-export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey}
+export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey, getEthWalletInfoFromMnemonic}
 
 /* Generated Address Wallet 1 BTC
 Mnemonic:  praise valley time inject leg vintage burst bottom unfair luggage mixed level

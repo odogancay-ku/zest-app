@@ -5,7 +5,7 @@ import {TextInput, Button, Text, useTheme, Surface} from 'react-native-paper';
 import {Picker} from "@react-native-picker/picker";
 import * as Clipboard from 'expo-clipboard';
 import * as SecureStore from 'expo-secure-store';
-import {getWalletInfoMnemonic, getEthWalletInfoFromPrivateKey} from "@/app/wallet-import";
+import {getWalletInfoMnemonic, getEthWalletInfoFromPrivateKey, getEthWalletInfoFromMnemonic} from "@/app/wallet-import";
 import {Wallet, WalletInfo} from "@/models/models";
 import {View, Alert} from "react-native";
 import LoadingOverlay from "@/app/widgets/LoadingOverlay";
@@ -30,7 +30,7 @@ export default function AddWallet() {
             let storedWallets = await SecureStore.getItemAsync('wallets');
             const wallets:Wallet[] = storedWallets ? JSON.parse(storedWallets) : []; //may cause problem if there is not wallet maybe???
             const new_id = wallets.reduce((maxId, wallet) => Math.max(maxId, parseInt(wallet.id)), 0) + 1;
-            if (mnemonic) {
+            if (walletNetwork === WalletNetwork.Bitcoin) {
                 let walletInfo: WalletInfo = await getWalletInfoMnemonic(mnemonic);
                 let newWallet: Wallet = {
                     id: new_id.toString(),
@@ -44,8 +44,17 @@ export default function AddWallet() {
                 wallets.push(newWallet);
                 await SecureStore.setItemAsync('wallets', JSON.stringify(wallets));
                 router.replace('/');
-            } else if (key) {
-                let walletInfo: WalletInfo = await getEthWalletInfoFromPrivateKey(key);
+            } else if (walletNetwork === WalletNetwork.Citrea) {
+                let walletInfo: WalletInfo;
+                if (key) {
+                    walletInfo = await getEthWalletInfoFromPrivateKey(key);
+                }
+                else if (mnemonic) {
+                    walletInfo = await getEthWalletInfoFromMnemonic(mnemonic);
+                }else {
+                    throw new Error("Both key and mnemonic are undefined for Citrea network.");
+                }
+
                 let newWallet: Wallet = {
                     id: new_id.toString(),
                     name: walletName,
