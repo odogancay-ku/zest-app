@@ -4,6 +4,7 @@ import * as Bitcoin from 'bitcoinjs-lib'
 import {UTXOResponse, Wallet} from "@/models/models";
 import {PsbtInputExtended} from "bip174/src/lib/interfaces";
 import {WalletNetwork} from "@/constants/Enums";
+import {ethers} from "ethers";
 
 
 async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddress: string) {
@@ -14,7 +15,7 @@ async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddr
         }
 
         if (wallet.network === WalletNetwork.Citrea) {
-            makeTransactionCitrea(wallet, value, receiverWalletAddress);
+            sendTransactionCitrea(wallet, value, receiverWalletAddress);
             return;
         }
 
@@ -121,15 +122,27 @@ async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddr
 //Citrea make transaction
 function makeTransactionCitrea(wallet: Wallet, value: string, receiverWalletAddress: string) {
 
-    if (!wallet) {
-        alert("Wallet not selected or doesn't exist.");
-        return;
-    }
+
     console.log("wallet", wallet);
     console.log("value", value);
     console.log("receiverWalletAddress", receiverWalletAddress);
 
 }
+async function sendTransactionCitrea(connectedWallet:Wallet, receiver:string, value:string) {
+    if (!connectedWallet) {
+        alert("Wallet not selected or doesn't exist.");
+        return;
+    }
+    let ethersWallet= new ethers.Wallet(connectedWallet.privateKey);
+    const provider = new ethers.JsonRpcProvider("https://rpc.testnet.citrea.xyz");
+    ethersWallet = ethersWallet.connect(provider);
+    return await ethersWallet.sendTransaction({
+        to: receiver,
+        value: ethers.parseEther(value)
+    });
+}
+
+
 
 
 

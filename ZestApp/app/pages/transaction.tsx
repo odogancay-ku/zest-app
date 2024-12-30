@@ -44,7 +44,6 @@ export default function Transaction() {
             alert("Wallet not selected or doesn't exist.");
             return;
         }
-
         await makeTransaction(selectedWallet, value, receiverWalletAddress);
     };
 
