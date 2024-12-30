@@ -77,12 +77,16 @@ async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<Walle
     // if (!ethers.isHexString(privateKey, 32)) {
     //     throw new Error("Invalid private key.");
     // }
-    const validPrivateKey = `0x${privateKey}`;
+    //if not hex string, convert to hex string
+    console.log("privateKey", privateKey);
+    if (!privateKey.startsWith("0x")) {
+        privateKey = `0x${privateKey}`;
+    }
 
-    const privateKeyBytes = ethers.hexlify(validPrivateKey);
+    const privateKeyBytes = ethers.hexlify(privateKey);
 
     // Create a wallet instance from the private key
-    const wallet = new ethers.Wallet(validPrivateKey);
+    const wallet = new ethers.Wallet(privateKey);
 
     // Derive wallet information
     const address = wallet.address;

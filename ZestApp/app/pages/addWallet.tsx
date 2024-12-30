@@ -45,15 +45,19 @@ export default function AddWallet() {
                 await SecureStore.setItemAsync('wallets', JSON.stringify(wallets));
                 router.replace('/');
             } else if (walletNetwork === WalletNetwork.Citrea) {
+                console.log("citrea");
                 let walletInfo: WalletInfo;
                 if (key) {
+                    console.log("key");
                     walletInfo = await getEthWalletInfoFromPrivateKey(key);
                 }
                 else if (mnemonic) {
+                    console.log("mnemonic");
                     walletInfo = await getEthWalletInfoFromMnemonic(mnemonic);
                 }else {
                     throw new Error("Both key and mnemonic are undefined for Citrea network.");
                 }
+                console.log("walletInfo", walletInfo);
 
                 let newWallet: Wallet = {
                     id: new_id.toString(),
