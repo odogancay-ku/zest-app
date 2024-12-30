@@ -22,6 +22,7 @@ interface WalletDisplay {
 interface WalletInfo{
     mnemonic: string,
     address: string,
+    network: WalletNetwork,
     privateKey: string,
     publicKey: string
 }
