@@ -4,6 +4,7 @@ import {Picker} from "@react-native-picker/picker";
 import {Button, Text, TextInput, useTheme, Surface} from "react-native-paper";
 import {ScrollView} from "react-native";
 import {Stack} from "expo-router";
+import {createSwap, getBalance, getSwap, initVerification} from "@/app/atomicSwap";
 
 interface Wallet {
     id: number;
@@ -34,8 +35,18 @@ export default function AtomicSwap() {
         }
     };
 
-    const handleSubmit = () => {
-        alert(`You entered: ${value}`);
+    const handleSubmit = async () => {
+        console.log("...")
+        // Citrea Test Wallet
+        const selectedPrivKey = "0x0a2234fe8e6af9c93b3c6e076aebe82a8558036ed458fa065427ea48d8e502c6"
+        const recipientAddress = "tb1qqxqe6f08zsjz8j54duhwcfphctwq6qxunjmtpq"
+        const txid = "0x6bf4783ec9f16407ff3e6c471583ed2fd7443350054e0b6903dfc635cf7f786e"
+        const swapId = 2
+
+        //await createSwap(selectedPrivKey, 0.0001, 0.00001, recipientAddress);
+        //await getSwap(2);
+        //await getBalance();
+        //await initVerification(selectedPrivKey,txid,swapId);
     };
 
     return (
