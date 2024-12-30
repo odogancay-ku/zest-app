@@ -7,6 +7,7 @@ import * as SecureStore from "expo-secure-store";
 import {fetchBalance} from "@/app/wallet-import";
 import {TransactionHistory, Wallet} from "@/models/models";
 import LoadingOverlay from "@/app/widgets/LoadingOverlay"; // Adjust the import path as needed
+import QRCode from 'react-qr-code';
 
 const mockAll: TransactionHistory[] = [
     {id: 1, walletId: "1", amount: 100, date: "2021-09-01", type: "deposit"},
@@ -104,7 +105,6 @@ export default function WalletDetails() {
                     headerBackButtonDisplayMode: "minimal",
                 }}
             />
-
             {/* Show Loading Overlay if loading */}
             {loading && <LoadingOverlay message="Fetching wallet details..." />}
 
@@ -118,6 +118,18 @@ export default function WalletDetails() {
                         </Card.Content>
                     </Card>
 
+
+                    <View>
+                        {selectedWalletId && (
+                            <QRCode
+                                value={selectedWalletId.toString()}
+                                bgColor={'#FFFFFF'}
+                                fgColor={'#000000'}
+                                size={256}
+                            />
+                        )}
+                    </View> 
+                    
                     <Text variant="titleMedium">Transaction History</Text>
                     <Card mode="outlined" style={{flex: 1}}>
                         <Card.Content>
