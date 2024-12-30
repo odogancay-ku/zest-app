@@ -1,39 +1,39 @@
-import '@/app/shims'
-import React, {useEffect, useState} from 'react';
-import {Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid, RefreshControl} from 'react-native';
-import {Link, useFocusEffect, useRouter} from "expo-router";
-import {SafeAreaView} from "react-native-safe-area-context";
-import {Card, Text, IconButton, Divider, useTheme} from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid, RefreshControl, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Card, Text, IconButton, Divider, useTheme } from 'react-native-paper';
 import Carousel from "react-native-snap-carousel";
-import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
+import { Link, useRouter } from "expo-router";
 import CircleButton from "@/app/widgets/CircleButton";
 import * as SecureStore from 'expo-secure-store';
-import {Wallet, WalletDisplay} from "@/models/models";
-import {fetchBalance} from "@/app/wallet-import";
-import {WalletNetwork} from "@/constants/Enums";
-import {address} from "bitcoinjs-lib";
+import { WalletDisplay } from "@/models/models";
+import { WalletNetwork } from "@/constants/Enums";
+import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 
-// Mock Data for Transactions
-interface TransactionHistory {
-    walletId: string;
-    amount: number;
-    date: string;
-    type: string;
-}
-
-const mockAll: TransactionHistory[] = [
-    {walletId: "1", amount: 100, date: '2021-09-01', type: 'deposit'},
-    {walletId: "1", amount: 200, date: '2021-09-02', type: 'withdraw'},
-    {walletId: "2", amount: 300, date: '2021-09-03', type: 'deposit'},
-    {walletId: "3", amount: 400, date: '2021-09-04', type: 'withdraw'},
-];
+const fetchTransactions = async (address: string) => {
+    const url = `https://blockstream.info/testnet/api/address/${address}/txs`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Failed to fetch transactions");
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
 
 export default function HomeScreen() {
     const [wallets, setWallets] = useState<WalletDisplay[]>([]);
     const [selectedWalletIndex, setSelectedWalletIndex] = useState<number>(0);
-    const router = useRouter();
+    const [transactions, setTransactions] = useState<Record<string, any[]>>({});
+    const [isFetching, setIsFetching] = useState<boolean>(false);
     const theme = useTheme();
-    const [refreshing, setRefreshing] = React.useState(false);
+    const router = useRouter();
+
+    const copyToClipboard = (text: string) => {
+        Clipboard.setString(text);
+        ToastAndroid.show('Address copied to clipboard!', ToastAndroid.SHORT);
+    };
 
     const fetchWallets = async () => {
         const storedWallets = await SecureStore.getItemAsync('wallets');
@@ -43,32 +43,51 @@ export default function HomeScreen() {
             return;
         }
         const parsedWallets = JSON.parse(storedWallets);
-
-        const updatedWallets = await Promise.all(
-            parsedWallets.map(async (wallet: { address: string, network: WalletNetwork; }) => {
-                const balance = await fetchBalance(wallet.address, wallet.network);
-                return {...wallet, balance};
-            })
-        );
-
-        setWallets(updatedWallets);
+        setWallets(parsedWallets);
     };
 
-    const onRefresh = React.useCallback(() => {
-        setRefreshing(true);
+    const loadTransactions = async (wallet: WalletDisplay) => {
+        if (isFetching) return; // Prevent multiple fetches
+        setIsFetching(true);
+
+        const newTransactions = await fetchTransactions(wallet.address);
+        setTransactions((prev) => ({
+            ...prev,
+            [wallet.id]: newTransactions
+        }));
+
+        setIsFetching(false);
+    };
+
+    const onRefresh = async () => {
+        const currentWallet = wallets[selectedWalletIndex];
+        if (currentWallet) await loadTransactions(currentWallet);
+    };
+
+    useEffect(() => {
         fetchWallets();
-        setRefreshing(false);
-    }, [])
+    }, []);
 
-    useFocusEffect(React.useCallback(() => {
-        fetchWallets();
-    }, []));
+    useEffect(() => {
+        const currentWallet = wallets[selectedWalletIndex];
+        if (currentWallet && !transactions[currentWallet.id]) {
+            loadTransactions(currentWallet);
+        }
+    }, [selectedWalletIndex, wallets]);
 
-    const filteredTransactions = mockAll.filter(transaction => transaction.walletId === wallets[selectedWalletIndex]?.id);
+    const currentWallet = wallets[selectedWalletIndex];
+    const currentTransactions = currentWallet ? transactions[currentWallet.id] || [] : [];
 
-    const copyToClipboard = (text: string) => {
-        Clipboard.setString(text);
-        ToastAndroid.show('Address copied to clipboard!', ToastAndroid.SHORT);
+    const calculateNetBalance = (tx: any, address: string) => {
+        const incoming = tx.vout
+            .filter((output: any) => output.scriptpubkey_address === address)
+            .reduce((sum: number, output: any) => sum + output.value, 0);
+
+        const outgoing = tx.vin
+            .filter((input: any) => input.prevout?.scriptpubkey_address === address)
+            .reduce((sum: number, input: any) => sum + input.prevout.value, 0);
+
+        return incoming - outgoing; // Positive for incoming, negative for outgoing
     };
 
     return (
@@ -154,24 +173,34 @@ export default function HomeScreen() {
                 </Link>
             </ScrollView>
 
-            <Card style={{padding: 10}}>
-                <Card.Title title="Transaction History"/>
-                <Divider/>
-                <ScrollView>
-                    {filteredTransactions.map((transaction) => (
-                        <View key={transaction.date} style={{
-                            flexDirection: 'row',
-                            paddingVertical: 10,
-                            paddingHorizontal: 5,
-                            borderBottomWidth: 1,
-                            borderColor: '#eee'
-                        }}>
-                            <Text style={{flex: 1, fontSize: 16}}>{transaction.walletId}</Text>
-                            <Text style={{flex: 1, fontSize: 16}}>{transaction.amount}</Text>
-                            <Text style={{flex: 1, fontSize: 16}}>{transaction.date}</Text>
-                            <Text style={{flex: 1, fontSize: 16}}>{transaction.type}</Text>
-                        </View>
-                    ))}
+            <Card style={{ padding: 10 }}>
+                <Card.Title title="Transaction History" />
+                <Divider />
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
+                    }
+                >
+                    {currentTransactions.length > 0 ? (
+                        currentTransactions.map((tx) => (
+                            <View key={tx.status.block_time} style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 5, borderBottomWidth: 1, borderColor: '#eee' }}>
+                                <Text style={{ flex: 1, fontSize: 16 }}>
+                                    {new Date(tx.status.block_time * 1000).toLocaleDateString()}
+                                </Text>
+                                <Text style={{ flex: 1, fontSize: 16 }}>
+                                    {tx.status.confirmed ? 'Confirmed' : 'Pending'}
+                                </Text>
+                                <Text style={{ flex: 1, fontSize: 16 }}>
+                                    {calculateNetBalance(tx, currentWallet.address) > 0 ? '+' : ''}
+                                    {calculateNetBalance(tx, currentWallet.address)}
+                                </Text>
+                            </View>
+                        ))
+                    ) : isFetching ? (
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                    ) : (
+                        <Text style={{ textAlign: 'center', marginVertical: 20 }}>No Transactions Found</Text>
+                    )}
                 </ScrollView>
             </Card>
         </SafeAreaView>
