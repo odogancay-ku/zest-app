@@ -1,0 +1,14 @@
+{
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "hardhat": "^2.22.17"
+  },
+  "dependencies": {
+    "@keep-network/bitcoin-spv-sol": "^3.4.0-solc-0.8",
+    "@summa-tx/bitcoin-spv-js": "^4.0.2",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.4"
+  }
+}
