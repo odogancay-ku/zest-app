@@ -1,111 +1,203 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {Picker} from "@react-native-picker/picker";
-import {Button, Text, TextInput, useTheme, Surface} from "react-native-paper";
+import {Text, TextInput, Button, useTheme, Surface} from "react-native-paper";
 import {ScrollView} from "react-native";
-import {Stack} from "expo-router";
-import {createSwap, getBalance, getSwap, initVerification} from "@/app/atomicSwap";
+import {Stack, useLocalSearchParams} from "expo-router";
+import {createSwap, initVerification, refund} from "@/app/atomicSwap";
+import * as SecureStore from "expo-secure-store";
+import {Wallet} from "@/models/models";
+import {fetchBalance} from "@/app/wallet-import";
+import LoadingOverlay from "@/app/widgets/LoadingOverlay";
 
-interface Wallet {
-    id: number;
-    name: string;
-    balance: number;
-}
-
-const mockCards: Wallet[] = [
-    {id: 1, name: "Wallet 1", balance: 1000},
-    {id: 2, name: "Wallet 2", balance: 2000},
-    {id: 3, name: "Wallet 3", balance: 3000},
-];
-
-export default function AtomicSwap() {
+export default function AtomicSwapUI() {
     const theme = useTheme();
-    const [selectedWalletId, setSelectedWalletId] = useState<number>(mockCards[0]?.id || 0);
-    const [selectedCurrency, setSelectedCurrency] = useState<string>("BTC");
-    const [value, setValue] = useState<string>("");
 
-    const confirmSelection = () => {
-        const selectedWallet = mockCards.find(wallet => wallet.id === selectedWalletId);
-        alert(`You selected: ${selectedWallet?.name}\nBalance: $${selectedWallet?.balance}`);
-    };
+    const {selectedWalletIndex = 0} = useLocalSearchParams();
+    const [evmWallet, setEvmWallet] = useState<Wallet | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const handleChange = (input: string) => {
-        if (/^\d*$/.test(input)) {
-            setValue(input); // Only update if input is numeric
+    useEffect(() => {
+        fetchWallet();
+    }, []);
+
+
+    const fetchWallet = async () => {
+        setLoading(true); // Start loading
+        try {
+            const storedWallets = await SecureStore.getItemAsync("wallets");
+
+            if (storedWallets) {
+                const wallets: Wallet[] = JSON.parse(storedWallets);
+                setEvmWallet(wallets[+selectedWalletIndex]);
+                console.log("Selected wallet:", wallets[+selectedWalletIndex]);
+            } else {
+                console.log("No wallets found.");
+            }
+        } catch (error) {
+            console.error("Error fetching wallets:", error);
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
-    const handleSubmit = async () => {
-        console.log("...")
-        // Citrea Test Wallet
-        const selectedPrivKey = "0x0a2234fe8e6af9c93b3c6e076aebe82a8558036ed458fa065427ea48d8e502c6"
-        const recipientAddress = "tb1qqxqe6f08zsjz8j54duhwcfphctwq6qxunjmtpq"
-        const txid = "0x6bf4783ec9f16407ff3e6c471583ed2fd7443350054e0b6903dfc635cf7f786e"
-        const swapId = 2
+    if (!evmWallet) {
+        return (
+            <SafeAreaView style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+                <Text>No wallet found. Please add a wallet first.</Text>
+            </SafeAreaView>
+        );
+    }
 
-        //await createSwap(selectedPrivKey, 0.0001, 0.00001, recipientAddress);
-        //await getSwap(2);
-        //await getBalance();
-        //await initVerification(selectedPrivKey,txid,swapId);
+    // State for creating a swap
+    const [evmAmountToBeSent, setEvmAmountToBeSent] = useState<number>(0);
+    const [evmAmountToBeReceived, setEvmAmountToBeReceived] = useState<number>(0);
+    const [swapRecipient, setSwapRecipient] = useState<string>();
+
+    // State for initializing verification
+    const [transactionId, setTransactionId] = useState<string>();
+    const [swapIdVerification, setSwapIdVerification] = useState<number>(0);
+
+    // State for refund
+    const [swapIdRefund, setSwapIdRefund] = useState<number>(0);
+
+    const handleCreateSwap = async () => {
+        if (!evmAmountToBeReceived || !evmAmountToBeSent || !swapRecipient) {
+            alert("Please fill in all fields for creating a swap.");
+            return;
+        }
+
+        try {
+            const swapId = await createSwap(evmWallet.privateKey, evmAmountToBeReceived, evmAmountToBeSent, swapRecipient);
+            alert(`Swap created successfully! Swap ID: ${swapId}`);
+        } catch (error) {
+            console.error("Error creating swap:", error);
+            alert("Failed to create swap. Please try again.");
+        }
+    };
+
+    const handleInitVerification = async () => {
+        if (!transactionId || !swapIdVerification) {
+            alert("Please provide both Transaction ID and Swap ID for verification.");
+            return;
+        }
+
+        try {
+            await initVerification(evmWallet.privateKey, transactionId, swapIdVerification);
+            alert("Verification is started.");
+        } catch (error) {
+            console.error("Error initializing verification:", error);
+            alert("Failed to start verification. Please try again.");
+        }
+    };
+
+    const handleRefund = async () => {
+        if (!swapIdRefund) {
+            alert("Please provide a Swap ID for refund.");
+            return;
+        }
+
+        try {
+            await refund(swapIdRefund);
+            alert("Refund requested. This may take a couple of minutes.");
+        } catch (error) {
+            console.error("Error requesting refund:", error);
+            alert("Failed to request refund. Please try again.");
+        }
     };
 
     return (
         <ScrollView style={{backgroundColor: theme.colors.background}}>
             <Stack.Screen
                 options={{
-                    title: 'Atomic Swap',
+                    title: "Atomic Swap",
                     headerStyle: {backgroundColor: theme.colors.primaryContainer},
                     headerTintColor: theme.colors.onPrimary,
-                    headerTitleStyle: {
-                        fontWeight: 'bold',
-                    },
-                    headerBackButtonDisplayMode: 'minimal'
+                    headerTitleStyle: {fontWeight: "bold"},
                 }}
             />
-            <SafeAreaView style={{flex: 1, paddingHorizontal: 16, gap: 10}}>
-                {/* Wallet Picker */}
-                <Surface style={{padding: 16, elevation: 2}}>
-                    <Text variant="headlineSmall">Choose Wallet</Text>
-                    <Picker
-                        selectedValue={selectedWalletId}
-                        onValueChange={(itemValue) => setSelectedWalletId(itemValue)}
-                    >
-                        {mockCards.map((card) => (
-                            <Picker.Item key={card.id} label={card.name} value={card.id.toString()}/>
-                        ))}
-                    </Picker>
-                    <Text>Selected Wallet: {"Wallet " + selectedWalletId}</Text>
-                </Surface>
+            {loading && <LoadingOverlay message="Fetching wallet details..."/>}
 
-                {/* Currency Picker */}
-                <Surface style={{padding: 16, elevation: 2}}>
-                    <Text variant="headlineSmall">Choose Currency</Text>
-                    <Picker
-                        selectedValue={selectedCurrency}
-                        onValueChange={(itemValue) => setSelectedCurrency(itemValue)}
-                    >
-                        <Picker.Item label="BTC - Bitcoin" value="BTC"/>
-                        <Picker.Item label="ETH - Ethereum" value="ETH"/>
-                    </Picker>
-                    <Text>Selected Currency: {selectedCurrency}</Text>
-                </Surface>
-
-                {/* Amount Input and Submit */}
-                <Surface style={{padding: 16, elevation: 2}}>
-                    <Text variant="headlineSmall">Enter the Amount</Text>
+            {!loading &&  <SafeAreaView style={{flex: 1, padding: 16, gap: 20}}>
+                {/* Create Swap */}
+                <Surface style={{padding: 16, elevation: 2, gap: 10}}>
+                    <Text variant="headlineSmall">Create Swap</Text>
+                    <Text>From wallet: {evmWallet.address}</Text>
                     <TextInput
                         mode="outlined"
-                        value={value}
-                        onChangeText={handleChange}
+                        label="Amount to Send (EVM)"
+                        value={evmAmountToBeSent.toString()}
+                        onChangeText={(text) =>
+                            /^\d*\.?\d*$/.test(text) && setEvmAmountToBeSent(parseFloat(text))
+                        }
                         keyboardType="numeric"
-                        placeholder="0"
+                        placeholder="Enter Amount"
                     />
-                    <Button mode="contained" onPress={handleSubmit} style={{marginTop: 16}}>
-                        Swap
+                    <TextInput
+                        mode="outlined"
+                        label="Amount to Receive (BTC)"
+                        value={evmAmountToBeReceived.toString()}
+                        onChangeText={(text) =>
+                            /^\d*\.?\d*$/.test(text) && setEvmAmountToBeReceived(parseFloat(text))
+                        }
+                        keyboardType="numeric"
+                        placeholder="Enter Amount"
+                    />
+                    <TextInput
+                        mode="outlined"
+                        label="Recipient Wallet (BTC)"
+                        value={swapRecipient}
+                        onChangeText={setSwapRecipient}
+                        placeholder="Enter BTC Wallet Address"
+                    />
+                    <Button mode="contained" onPress={handleCreateSwap} style={{marginTop: 16}}>
+                        Create Swap
                     </Button>
                 </Surface>
 
-            </SafeAreaView>
+                {/* Initialize Verification */}
+                <Surface style={{padding: 16, elevation: 2, gap: 10}}>
+                    <Text variant="headlineSmall">Initialize Verification</Text>
+                    <TextInput
+                        mode="outlined"
+                        label="Transaction ID"
+                        value={transactionId}
+                        onChangeText={setTransactionId}
+                        placeholder="Enter Transaction ID"
+                    />
+                    <TextInput
+                        mode="outlined"
+                        label="Swap ID"
+                        value={swapIdVerification.toString()}
+                        onChangeText={(text) =>
+                            /^\d*$/.test(text) && setSwapIdVerification(parseInt(text, 10))
+                        }
+                        keyboardType="numeric"
+                        placeholder="Enter Swap ID"
+                    />
+                    <Button mode="contained" onPress={handleInitVerification} style={{marginTop: 16}}>
+                        Start Verification
+                    </Button>
+                </Surface>
+
+                {/* Refund */}
+                <Surface style={{padding: 16, elevation: 2, gap: 10}}>
+                    <Text variant="headlineSmall">Request Refund</Text>
+                    <TextInput
+                        mode="outlined"
+                        label="Swap ID"
+                        value={swapIdRefund.toString()}
+                        onChangeText={(text) =>
+                            /^\d*$/.test(text) && setSwapIdRefund(parseInt(text, 10))
+                        }
+                        keyboardType="numeric"
+                        placeholder="Enter Swap ID"
+                    />
+                    <Button mode="contained" onPress={handleRefund} style={{marginTop: 16}}>
+                        Request Refund
+                    </Button>
+                </Surface>
+            </SafeAreaView>}
+
         </ScrollView>
     );
 }
