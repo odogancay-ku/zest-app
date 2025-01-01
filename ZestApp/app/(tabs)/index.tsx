@@ -1,14 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { Dimensions, ScrollView, TouchableOpacity, View, Clipboard, ToastAndroid, RefreshControl, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Card, Text, IconButton, Divider, useTheme } from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {
+    Dimensions,
+    ScrollView,
+    TouchableOpacity,
+    View,
+    ToastAndroid,
+    RefreshControl,
+    ActivityIndicator,
+    Clipboard,
+    Modal,
+    StyleSheet,
+    Pressable,
+} from 'react-native';
+import {SafeAreaView} from "react-native-safe-area-context";
+import {Card, Text, IconButton, Divider, useTheme} from 'react-native-paper';
 import Carousel from "react-native-snap-carousel";
-import { Link, useRouter } from "expo-router";
+import {Link, useRouter} from "expo-router";
 import CircleButton from "@/app/widgets/CircleButton";
 import * as SecureStore from 'expo-secure-store';
-import { WalletDisplay } from "@/models/models";
-import { WalletNetwork } from "@/constants/Enums";
+import {WalletDisplay} from "@/models/models";
+import {WalletNetwork} from "@/constants/Enums";
 import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
+import createStyles from "@/app/styles/styles";
+import TransactionDetailModal from "@/app/widgets/TransactionDetailModal";
+import TransactionHistoryTable from "@/app/widgets/TransactionHistoryTable";
 
 const fetchTransactions = async (address: string) => {
     const url = `https://blockstream.info/testnet/api/address/${address}/txs`;
@@ -27,8 +42,11 @@ export default function HomeScreen() {
     const [selectedWalletIndex, setSelectedWalletIndex] = useState<number>(0);
     const [transactions, setTransactions] = useState<Record<string, any[]>>({});
     const [isFetching, setIsFetching] = useState<boolean>(false);
+    const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
     const theme = useTheme();
     const router = useRouter();
+    const styles = createStyles(theme);
 
     const copyToClipboard = (text: string) => {
         Clipboard.setString(text);
@@ -88,6 +106,15 @@ export default function HomeScreen() {
             .reduce((sum: number, input: any) => sum + input.prevout.value, 0);
 
         return incoming - outgoing; // Positive for incoming, negative for outgoing
+    };
+
+    const handleTransactionClick = (transaction: any) => {
+        if (!transaction) {
+            console.error("Invalid transaction");
+            return;
+        }
+        setSelectedTransaction(transaction);
+        setModalVisible(true);
     };
 
     return (
@@ -173,36 +200,10 @@ export default function HomeScreen() {
                 </Link>
             </ScrollView>
 
-            <Card style={{ padding: 10 }}>
-                <Card.Title title="Transaction History" />
-                <Divider />
-                <ScrollView
-                    refreshControl={
-                        <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
-                    }
-                >
-                    {currentTransactions.length > 0 ? (
-                        currentTransactions.map((tx) => (
-                            <View key={tx.status.block_time} style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 5, borderBottomWidth: 1, borderColor: '#eee' }}>
-                                <Text style={{ flex: 1, fontSize: 16 }}>
-                                    {new Date(tx.status.block_time * 1000).toLocaleDateString()}
-                                </Text>
-                                <Text style={{ flex: 1, fontSize: 16 }}>
-                                    {tx.status.confirmed ? 'Confirmed' : 'Pending'}
-                                </Text>
-                                <Text style={{ flex: 1, fontSize: 16 }}>
-                                    {calculateNetBalance(tx, currentWallet.address) > 0 ? '+' : ''}
-                                    {calculateNetBalance(tx, currentWallet.address)}
-                                </Text>
-                            </View>
-                        ))
-                    ) : isFetching ? (
-                        <ActivityIndicator size="large" color={theme.colors.primary} />
-                    ) : (
-                        <Text style={{ textAlign: 'center', marginVertical: 20 }}>No Transactions Found</Text>
-                    )}
-                </ScrollView>
-            </Card>
+            <TransactionHistoryTable isFetching={isFetching} onRefresh={onRefresh} currentTransactions={currentTransactions} handleTransactionClick={handleTransactionClick} currentWallet={currentWallet} modalVisible={modalVisible} setModalVisible={setModalVisible} selectedTransaction={selectedTransaction} />
+
+
         </SafeAreaView>
     );
 }
+
