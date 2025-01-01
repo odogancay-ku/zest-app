@@ -183,7 +183,7 @@ export default function HomeScreen() {
                             padding: 10
                         }}
                         showsHorizontalScrollIndicator={false}>
-                <Link href={{pathname: "/pages/atomicSwap"}} asChild>
+                <Link href={{pathname: "/pages/atomicSwap", params: {selectedWalletIndex}}} asChild>
                     <CircleButton>
                         <MaterialIcons name="currency-exchange" size={30} color="black"/>
                     </CircleButton>
