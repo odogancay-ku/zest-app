@@ -24,6 +24,7 @@ import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-
 import createStyles from "@/app/styles/styles";
 import TransactionDetailModal from "@/app/widgets/TransactionDetailModal";
 import TransactionHistoryTable from "@/app/widgets/TransactionHistoryTable";
+import {fetchBalance} from "@/app/wallet-import";
 
 const fetchTransactions = async (address: string) => {
     const url = `https://blockstream.info/testnet/api/address/${address}/txs`;
@@ -61,6 +62,9 @@ export default function HomeScreen() {
             return;
         }
         const parsedWallets = JSON.parse(storedWallets);
+        for (let wallet of parsedWallets) {
+            wallet.balance = fetchBalance(wallet.address, wallet.network);
+        }
         setWallets(parsedWallets);
     };
 
@@ -95,18 +99,6 @@ export default function HomeScreen() {
 
     const currentWallet = wallets[selectedWalletIndex];
     const currentTransactions = currentWallet ? transactions[currentWallet.id] || [] : [];
-
-    const calculateNetBalance = (tx: any, address: string) => {
-        const incoming = tx.vout
-            .filter((output: any) => output.scriptpubkey_address === address)
-            .reduce((sum: number, output: any) => sum + output.value, 0);
-
-        const outgoing = tx.vin
-            .filter((input: any) => input.prevout?.scriptpubkey_address === address)
-            .reduce((sum: number, input: any) => sum + input.prevout.value, 0);
-
-        return incoming - outgoing; // Positive for incoming, negative for outgoing
-    };
 
     const handleTransactionClick = (transaction: any) => {
         if (!transaction) {

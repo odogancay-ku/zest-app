@@ -15,7 +15,7 @@ export default function Transaction() {
     const [receiverWalletAddress, setReceiverWalletAddress] = useState<string>("");
     const [value, setValue] = useState<string>("");
     const [wallets, setWallets] = useState<Wallet[]>([]);
-
+    const [customData, setCustomData] = useState<string>("");
     const fetchWallets = async () => {
         const storedWallets = await SecureStore.getItemAsync("wallets");
 
@@ -44,7 +44,7 @@ export default function Transaction() {
             alert("Wallet not selected or doesn't exist.");
             return;
         }
-        await makeTransaction(selectedWallet, value, receiverWalletAddress);
+        await makeTransaction(selectedWallet, value, receiverWalletAddress, customData);
     };
 
     return (
@@ -80,6 +80,16 @@ export default function Transaction() {
                         value={receiverWalletAddress}
                         onChangeText={setReceiverWalletAddress}
                         placeholder="Receiver's Address"
+                    />
+                </Surface>
+                {/* Return Data */}
+                <Surface style={{ padding: 16, elevation: 2 }}>
+                    <Text variant="headlineSmall">Data</Text>
+                    <TextInput
+                        mode="outlined"
+                        value={customData}
+                        onChangeText={setCustomData}
+                        placeholder="(optional)"
                     />
                 </Surface>
 

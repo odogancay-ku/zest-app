@@ -7,7 +7,7 @@ import {WalletNetwork} from "@/constants/Enums";
 import {ethers} from "ethers";
 
 
-async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddress: string) {
+async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddress: string, customData: string) {
 
         if (!wallet) {
             alert("Wallet not selected or doesn't exist.");
@@ -15,7 +15,7 @@ async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddr
         }
 
         if (wallet.network === WalletNetwork.Citrea) {
-            sendTransactionCitrea(wallet, value, receiverWalletAddress);
+            await sendTransactionCitrea(wallet, value, receiverWalletAddress);
             return;
         }
 
@@ -75,19 +75,22 @@ async function makeTransaction(wallet: Wallet, value: string, receiverWalletAddr
                 value: change,
             })
 
-            /* Embed data in OP_RETURN output
-            const ethAddress = 'Eda026247a58aFca8B98cEE391e7D72c25BC5A09';
-            const opReturnData = Buffer.from(ethAddress, 'hex'); // Convert Ethereum address to buffer
 
-            const embed = Bitcoin.script.compile([
-                Bitcoin.opcodes.OP_RETURN,
-                opReturnData
-            ])
-            txb.addOutput({
-                script: embed,
-                value: 0
-            })
-             */
+            if (customData) {
+                if (customData.startsWith("0x")) {
+                    customData = customData.slice(2);
+                }
+                console.log("Custom Data:", customData);
+                const data = Buffer.from(customData, 'hex');
+                const embed = Bitcoin.script.compile([
+                    Bitcoin.opcodes.OP_RETURN,
+                    data
+                ])
+                txb.addOutput({
+                    script: embed,
+                    value: 0
+                })
+            }
 
             // Sign the inputs
             const keyPair = Bitcoin.ECPair.fromWIF(privateKey, network);
