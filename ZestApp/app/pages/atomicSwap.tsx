@@ -10,15 +10,12 @@ import {fetchBalance} from "@/app/wallet-import";
 import LoadingOverlay from "@/app/widgets/LoadingOverlay";
 
 export default function AtomicSwapUI() {
-    const theme = useTheme();
 
     const {selectedWalletIndex = 0} = useLocalSearchParams();
     const [evmWallet, setEvmWallet] = useState<Wallet | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchWallet();
-    }, []);
+    const theme = useTheme();
 
 
     const fetchWallet = async () => {
@@ -40,13 +37,12 @@ export default function AtomicSwapUI() {
         }
     };
 
-    if (!evmWallet) {
-        return (
-            <SafeAreaView style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-                <Text>No wallet found. Please add a wallet first.</Text>
-            </SafeAreaView>
-        );
-    }
+    useEffect(() => {
+        fetchWallet();
+    }, []);
+
+
+
 
     // State for creating a swap
     const [evmAmountToBeSent, setEvmAmountToBeSent] = useState<number>(0);
@@ -59,6 +55,15 @@ export default function AtomicSwapUI() {
 
     // State for refund
     const [swapIdRefund, setSwapIdRefund] = useState<number>(0);
+
+
+    if (!evmWallet) {
+        return (
+            <SafeAreaView style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+                <Text>No wallet found. Please add a wallet first.</Text>
+            </SafeAreaView>
+        );
+    }
 
     const handleCreateSwap = async () => {
         if (!evmAmountToBeReceived || !evmAmountToBeSent || !swapRecipient) {
