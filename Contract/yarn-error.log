@@ -1,0 +1,42 @@
+Arguments: 
+  /Users/omerislam/.nvm/versions/node/v23.5.0/bin/node /usr/local/bin/yarn add bitcoin-spv
+
+PATH: 
+  /Users/omerislam/.nvm/versions/node/v23.5.0/bin:/Users/omerislam/miniconda3/bin:/Users/omerislam/.rbenv/shims:/Users/omerislam/.rbenv/bin:/opt/homebrew/opt/ruby/bin:/Users/omerislam/.rbenv/shims:/Users/omerislam/.rbenv/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/usr/local/share/dotnet:~/.dotnet/tools:/Users/omerislam/Desktop/Ömer/Koç/4th Year/bitirme/Contract/node_modules/.bin:/Users/omerislam/development/flutter/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  23.5.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/bitcoin-spv: Not found
+      at params.callback [as _callback] (/usr/local/lib/node_modules/yarn/lib/cli.js:66145:18)
+      at self.callback (/usr/local/lib/node_modules/yarn/lib/cli.js:140890:22)
+      at Request.emit (node:events:513:28)
+      at Request.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:141862:10)
+      at Request.emit (node:events:513:28)
+      at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:141784:12)
+      at Object.onceWrapper (node:events:627:28)
+      at IncomingMessage.emit (node:events:525:35)
+      at endReadableNT (node:internal/streams/readable:1696:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+
+npm manifest: 
+  {
+    "name": "hardhat-project",
+    "devDependencies": {
+      "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+      "hardhat": "^2.22.17"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

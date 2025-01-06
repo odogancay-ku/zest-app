@@ -24,6 +24,7 @@ export default function Transaction() {
     const [scanned, setScanned] = useState<boolean>(false);
     const [permission, requestPermission] = useCameraPermissions();
 
+    const [customData, setCustomData] = useState<string>("");
     const fetchWallets = async () => {
         const storedWallets = await SecureStore.getItemAsync("wallets");
 
@@ -52,8 +53,7 @@ export default function Transaction() {
             alert("Wallet not selected or doesn't exist.");
             return;
         }
-
-        await makeTransaction(selectedWallet, value, receiverWalletAddress);
+        await makeTransaction(selectedWallet, value, receiverWalletAddress, customData);
     };
 
     useEffect(() => {
@@ -168,11 +168,22 @@ export default function Transaction() {
                         placeholder="Receiver's Address"
                     />
                 </Surface>
+
                 <View style={{marginTop: 10}}>
                     <Button mode="contained" color={theme.colors.error} onPress={showQRCode}>
                         Scan QR
                     </Button>
                 </View>
+                {/* Return Data */}
+                <Surface style={{ padding: 16, elevation: 2 }}>
+                    <Text variant="headlineSmall">Data</Text>
+                    <TextInput
+                        mode="outlined"
+                        value={customData}
+                        onChangeText={setCustomData}
+                        placeholder="(optional)"
+                    />
+                </Surface>
 
                 {/* Amount Input */}
                 <Surface style={{ padding: 16, elevation: 2 }}>

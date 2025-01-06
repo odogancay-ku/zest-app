@@ -2,32 +2,45 @@ import React, {useEffect, useState} from "react";
 import {ScrollView, View, Alert, Modal, StyleSheet, TouchableOpacity} from "react-native";
 import {Stack, useLocalSearchParams, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {Text, Card, Divider, Button, useTheme} from "react-native-paper";
+import {Text, Card, Button, useTheme, Divider} from "react-native-paper";
 import * as SecureStore from "expo-secure-store";
 import {fetchBalance} from "@/app/wallet-import";
+
 import {TransactionHistory, Wallet} from "@/models/models";
 import LoadingOverlay from "@/app/widgets/LoadingOverlay"; // Adjust the import path as needed
 import QRCode from 'react-qr-code';
+import createStyles from "@/app/styles/styles";
+import TransactionHistoryTable from "@/app/widgets/TransactionHistoryTable"; // Adjust import path as needed
 
-const mockAll: TransactionHistory[] = [
-    {id: 1, walletId: "1", amount: 100, date: "2021-09-01", type: "deposit"},
-    {id: 2, walletId: "1", amount: 200, date: "2021-09-02", type: "withdraw"},
-    {id: 3, walletId: "2", amount: 300, date: "2021-09-03", type: "deposit"},
-    {id: 4, walletId: "3", amount: 400, date: "2021-09-04", type: "withdraw"},
-];
+const fetchTransactions = async (address: string) => {
+    const url = `https://blockstream.info/testnet/api/address/${address}/txs`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Failed to fetch transactions");
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
 
 export default function WalletDetails() {
     const {selectedWalletId = 0} = useLocalSearchParams();
     const [wallet, setWallet] = useState<Wallet | null>(null);
-    const [walletTransactions, setWalletTransactions] = useState<TransactionHistory[]>([]);
-    const [loading, setLoading] = useState(true); // Loading state
+
     const [qrModalVisible, setQrModalVisible] = useState(false); 
+
+    const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
+    const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [loading, setLoading] = useState(true);
     const theme = useTheme();
     const router = useRouter();
+    const styles = createStyles(theme);
 
     useEffect(() => {
         const fetchWalletDetails = async () => {
-            setLoading(true); // Show loading spinner
+            setLoading(true);
             try {
                 const storedWallets = await SecureStore.getItemAsync("wallets");
                 if (!storedWallets) {
@@ -40,15 +53,12 @@ export default function WalletDetails() {
                 const selectedWallet = parsedWallets.find((w: { id: string }) => w.id == selectedWalletId);
 
                 if (selectedWallet) {
-                    console.log("selectedWallet", selectedWallet);
                     const balance = await fetchBalance(selectedWallet.address, selectedWallet.network);
-                    console.log("balance", balance);
                     const wallet = {...selectedWallet, balance};
                     setWallet(wallet);
-                    const filteredTransactions = mockAll.filter(
-                        (transaction) => transaction.walletId === selectedWalletId
-                    );
-                    setWalletTransactions(filteredTransactions);
+
+                    const transactions = await fetchTransactions(selectedWallet.address);
+                    setWalletTransactions(transactions);
                 } else {
                     setWallet(null);
                 }
@@ -56,7 +66,7 @@ export default function WalletDetails() {
                 console.error("Error fetching wallet details:", error);
                 setWallet(null);
             } finally {
-                setLoading(false); // Hide loading spinner
+                setLoading(false);
             }
         };
 
@@ -64,7 +74,7 @@ export default function WalletDetails() {
     }, [selectedWalletId]);
 
     const handleDeleteWallet = async () => {
-        setLoading(true); // Show loading spinner
+        setLoading(true);
         try {
             const storedWallets = await SecureStore.getItemAsync("wallets");
             if (!storedWallets) return;
@@ -74,11 +84,11 @@ export default function WalletDetails() {
 
             await SecureStore.setItemAsync("wallets", JSON.stringify(updatedWallets));
             Alert.alert("Success", "Wallet has been deleted.");
-            router.push("/"); // Redirect to the index page after deleting
+            router.push("/");
         } catch (error) {
             Alert.alert("Error", "Failed to delete wallet. Please try again.");
         } finally {
-            setLoading(false); // Hide loading spinner
+            setLoading(false);
         }
     };
 
@@ -105,27 +115,31 @@ export default function WalletDetails() {
         <SafeAreaView style={{flex: 1, padding: 10, backgroundColor: theme.colors.background, gap: 20}}>
             <Stack.Screen
                 options={{
-                    title: "Wallet Details for wallet " + selectedWalletId,
+                    title: `Wallet Details for wallet ${selectedWalletId}`,
                     headerStyle: {backgroundColor: theme.colors.primaryContainer},
                     headerTintColor: theme.colors.onPrimary,
-                    headerTitleStyle: {
-                        fontWeight: "bold",
-                    },
+                    headerTitleStyle: {fontWeight: "bold"},
                     headerBackButtonDisplayMode: "minimal",
                 }}
             />
+
             {/* Show Loading Overlay if loading */}
             {loading && <LoadingOverlay message="Fetching wallet details..." />}
 
+
+            {loading && <LoadingOverlay message="Fetching wallet details..."/>}
+
             {!loading && wallet ? (
                 <>
-                    <Card mode="outlined">
-                        <Card.Title title={wallet.name} />
-                        <Card.Content>
+                    <Card>
+                        <Card.Title title={wallet.name}/>
+                        <Divider/>
+                        <View style={{gap:10, padding: 10}}>
                             <Text>Balance: ${wallet.balance}</Text>
                             <Text>Network: {wallet.network}</Text>
-                        </Card.Content>
+                        </View>
                     </Card>
+
                     
                     <Text variant="titleMedium">Transaction History</Text>
                     <Card mode="outlined" style={{flex: 1}}>
@@ -167,6 +181,28 @@ export default function WalletDetails() {
                         </Button>
                     </View>
                     <View style={{marginTop: 0}}>
+
+
+                    <TransactionHistoryTable
+                        isFetching={loading}
+                        onRefresh={async () => {
+                            setLoading(true);
+                            const transactions = await fetchTransactions(wallet.address);
+                            setWalletTransactions(transactions);
+                            setLoading(false);
+                        }}
+                        currentTransactions={walletTransactions}
+                        handleTransactionClick={(tx) => {
+                            setSelectedTransaction(tx);
+                            setModalVisible(true);
+                        }}
+                        currentWallet={wallet}
+                        modalVisible={modalVisible}
+                        setModalVisible={setModalVisible}
+                        selectedTransaction={selectedTransaction}
+                    />
+
+                    <View style={{marginTop: 20}}>
                         <Button mode="contained" color={theme.colors.error} onPress={confirmDeleteWallet}>
                             Delete This Wallet
                         </Button>

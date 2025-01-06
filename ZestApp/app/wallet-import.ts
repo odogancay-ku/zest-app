@@ -30,12 +30,26 @@ function createNewWallet() {
     let walletInfo: WalletInfo = {
         mnemonic: mnemonic,
         address: address,
+        network: WalletNetwork.Bitcoin,
         privateKey: privateKey,
         publicKey: keyPair.publicKey.toString()
     }
     return walletInfo
 }
 
+function createNewWalletCitrea(): WalletInfo {
+    const mnemonicStr: string = bip39.generateMnemonic();
+    const wallet = ethers.Wallet.fromPhrase(mnemonicStr);
+
+    let walletInfo: WalletInfo = {
+        mnemonic: mnemonicStr,
+        address: wallet.address,
+        network: WalletNetwork.Citrea,
+        privateKey: wallet.privateKey,
+        publicKey: wallet.signingKey.publicKey
+    };
+    return walletInfo;
+}
 
 function generateMnemonic() {
     return bip39.generateMnemonic();
@@ -51,6 +65,7 @@ async function getWalletInfoMnemonic(mnemonicPhrase: string) {
     let walletInfo: WalletInfo = {
         mnemonic: mnemonicPhrase,
         address: address,
+        network: WalletNetwork.Bitcoin,
         privateKey: privateKey,
         publicKey: keyPair.publicKey.toString()
     }
@@ -62,12 +77,16 @@ async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<Walle
     // if (!ethers.isHexString(privateKey, 32)) {
     //     throw new Error("Invalid private key.");
     // }
-    const validPrivateKey = `0x${privateKey}`;
+    //if not hex string, convert to hex string
+    console.log("privateKey", privateKey);
+    if (!privateKey.startsWith("0x")) {
+        privateKey = `0x${privateKey}`;
+    }
 
-    const privateKeyBytes = ethers.hexlify(validPrivateKey);
+    const privateKeyBytes = ethers.hexlify(privateKey);
 
     // Create a wallet instance from the private key
-    const wallet = new ethers.Wallet(validPrivateKey);
+    const wallet = new ethers.Wallet(privateKey);
 
     // Derive wallet information
     const address = wallet.address;
@@ -76,9 +95,15 @@ async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<Walle
     return {
         mnemonic: "", // Mnemonic is not available when deriving from private key
         address: address,
+        network: WalletNetwork.Citrea,
         privateKey: privateKey,
         publicKey: publicKey
     };
+}
+
+async function getEthWalletInfoFromMnemonic(mnemonic: string): Promise<WalletInfo> {
+    const wallet = ethers.Wallet.fromPhrase(mnemonic);
+    return  getEthWalletInfoFromPrivateKey(wallet.privateKey);
 }
 
 async function fetchBalance(address: string, network: WalletNetwork) {
@@ -91,7 +116,7 @@ async function fetchBalance(address: string, network: WalletNetwork) {
             return remaining/100000000;
         } else {
             const response = await axios.get(`https://explorer.testnet.citrea.xyz/api/v2/addresses/${address}`);
-            return response.data.coin_balance / 100000000;
+            return ethers.formatEther(response.data.coin_balance);
         }
     } catch (error) {
         console.error("Error fetching balance:", error);
@@ -110,7 +135,7 @@ const fetchBalanceFromPhase = async (mnemonicPhrase: string) => {
     return -1
 }
 
-export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey}
+export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey, getEthWalletInfoFromMnemonic}
 
 /* Generated Address Wallet 1 BTC
 Mnemonic:  praise valley time inject leg vintage burst bottom unfair luggage mixed level
@@ -134,5 +159,5 @@ tb1qqxqe6f08zsjz8j54duhwcfphctwq6qxunjmtpq
 
 /* Wallet 3 cBTC
 0xEda026247a58aFca8B98cEE391e7D72c25BC5A09
-
+68f0850abe026c4020804d32a0d3aa322f9097f3abcdda58ccec7bc1ca534964
  */
