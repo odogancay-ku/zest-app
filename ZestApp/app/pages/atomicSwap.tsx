@@ -152,7 +152,7 @@ export default function AtomicSwapUI() {
                         label="Recipient Wallet (BTC)"
                         value={swapRecipient}
                         onChangeText={setSwapRecipient}
-                        placeholder="Enter BTC Wallet Address"
+                        placeholder="Enter Your BTC Wallet Address"
                     />
                     <Button mode="contained" onPress={handleCreateSwap} style={{marginTop: 16}}>
                         Create Swap

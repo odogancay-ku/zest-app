@@ -64,6 +64,7 @@ export default function HomeScreen() {
         const parsedWallets = JSON.parse(storedWallets);
         for (let wallet of parsedWallets) {
             wallet.balance = fetchBalance(wallet.address, wallet.network);
+            console.log(wallet)
         }
         setWallets(parsedWallets);
     };
