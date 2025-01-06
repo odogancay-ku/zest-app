@@ -28,7 +28,7 @@ export default function WalletDetails() {
     const {selectedWalletId = 0} = useLocalSearchParams();
     const [wallet, setWallet] = useState<Wallet | null>(null);
 
-    const [qrModalVisible, setQrModalVisible] = useState(false);
+    const [qrModalVisible, setQrModalVisible] = useState(false); 
 
     const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
     const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
@@ -124,6 +124,9 @@ export default function WalletDetails() {
             />
 
             {/* Show Loading Overlay if loading */}
+            {loading && <LoadingOverlay message="Fetching wallet details..." />}
+
+
             {loading && <LoadingOverlay message="Fetching wallet details..."/>}
 
             {!loading && wallet ? (
@@ -131,24 +134,24 @@ export default function WalletDetails() {
                     <Card>
                         <Card.Title title={wallet.name}/>
                         <Divider/>
-                        <View style={{gap: 10, padding: 10}}>
+                        <View style={{gap:10, padding: 10}}>
                             <Text>Balance: ${wallet.balance}</Text>
                             <Text>Network: {wallet.network}</Text>
                         </View>
                     </Card>
 
-
+                    
                     <Text variant="titleMedium">Transaction History</Text>
                     <Card mode="outlined" style={{flex: 1}}>
                         <Card.Content>
                             <ScrollView>
-                                <Divider style={{marginBottom: 10}}/>
+                                <Divider style={{marginBottom: 10}} />
                                 <View key={1} style={{flexDirection: "row", justifyContent: "space-between"}}>
                                     <Text>Date</Text>
                                     <Text>Type</Text>
                                     <Text>Amount</Text>
                                 </View>
-                                <Divider style={{marginVertical: 10}}/>
+                                <Divider style={{marginVertical: 10}} />
                                 {walletTransactions.length > 0 ? (
                                     walletTransactions.map((transaction) => (
                                         <View
@@ -178,44 +181,46 @@ export default function WalletDetails() {
                         </Button>
                     </View>
                     <View style={{marginTop: 0}}>
-                        <TransactionHistoryTable
-                            isFetching={loading}
-                            onRefresh={async () => {
-                                setLoading(true);
-                                const transactions = await fetchTransactions(wallet.address);
-                                setWalletTransactions(transactions);
-                                setLoading(false);
-                            }}
-                            currentTransactions={walletTransactions}
-                            handleTransactionClick={(tx) => {
-                                setSelectedTransaction(tx);
-                                setModalVisible(true);
-                            }}
-                            currentWallet={wallet}
-                            modalVisible={modalVisible}
-                            setModalVisible={setModalVisible}
-                            selectedTransaction={selectedTransaction}
-                        />
 
-                        <View style={{marginTop: 20}}>
-                            <Button mode="contained" color={theme.colors.error} onPress={confirmDeleteWallet}>
-                                Delete This Wallet
-                            </Button>
-                        </View>
-                        {/* Show QR Code */}
-                        <Modal
-                            animationType="fade"
-                            transparent={true}
-                            visible={qrModalVisible}
-                            onRequestClose={closeQRCode}
-                        >
+
+                    <TransactionHistoryTable
+                        isFetching={loading}
+                        onRefresh={async () => {
+                            setLoading(true);
+                            const transactions = await fetchTransactions(wallet.address);
+                            setWalletTransactions(transactions);
+                            setLoading(false);
+                        }}
+                        currentTransactions={walletTransactions}
+                        handleTransactionClick={(tx) => {
+                            setSelectedTransaction(tx);
+                            setModalVisible(true);
+                        }}
+                        currentWallet={wallet}
+                        modalVisible={modalVisible}
+                        setModalVisible={setModalVisible}
+                        selectedTransaction={selectedTransaction}
+                    />
+
+                    <View style={{marginTop: 20}}>
+                        <Button mode="contained" color={theme.colors.error} onPress={confirmDeleteWallet}>
+                            Delete This Wallet
+                        </Button>
+                    </View>
+                    {/* Show QR Code */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={qrModalVisible}
+                        onRequestClose={closeQRCode}
+                    >
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        }}>
                             <View style={{
-                                flex: 1,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                            }}>
-                                <View style={{
                                     width: 300,
                                     backgroundColor: "white",
                                     padding: 50,
@@ -223,28 +228,27 @@ export default function WalletDetails() {
                                     alignItems: "center",
                                     elevation: 5,
                                 }}>
-                                    <View>
-                                        {selectedWalletId && (
-                                            <QRCode
-                                                value={wallet.address.toString()}
-                                                bgColor="#FFFFFF"
-                                                fgColor="#000000"
-                                                size={200}
-                                            />
-                                        )}
-                                    </View>
-                                    <TouchableOpacity style={{
-                                        marginTop: 20,
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        backgroundColor: "#2196F3",
-                                    }} onPress={closeQRCode}>
-                                        <Text>Close</Text>
-                                    </TouchableOpacity>
+                                <View>
+                                    {selectedWalletId && (
+                                        <QRCode
+                                            value={wallet.address.toString()}
+                                            bgColor="#FFFFFF"
+                                            fgColor="#000000"
+                                            size={200}
+                                        />
+                                    )}
                                 </View>
+                                <TouchableOpacity style={{
+                                    marginTop: 20,
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    backgroundColor: "#2196F3",
+                                }} onPress={closeQRCode}>
+                                    <Text>Close</Text>
+                                </TouchableOpacity>
                             </View>
-                        </Modal>
-                    </View>
+                        </View>
+                    </Modal>
                 </>
             ) : (
                 !loading && (
@@ -253,7 +257,6 @@ export default function WalletDetails() {
                     </Text>
                 )
             )}
-
         </SafeAreaView>
     );
 }
