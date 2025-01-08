@@ -2,5 +2,6 @@
 
 export  enum WalletNetwork {
     Bitcoin = "BTC-Bitcoin",
-    Citrea = "CBTC-Citrea"
+    Citrea = "CBTC-Citrea",
+    Lightning = "BTC-Lightning"
 }

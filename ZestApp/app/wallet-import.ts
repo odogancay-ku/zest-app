@@ -11,6 +11,75 @@ import {AddressInfo, WalletInfo} from "@/models/models";
 
 const bip32 = BIP32Factory(ecc);
 
+class LndFeignClient {
+    private privateKey: string;
+    private apiUrl: string;
+
+    constructor() {
+        this.privateKey = "f11fd2e26fb94190b16b98f37f92b980";
+        this.apiUrl = "https://f5953107e2.d.voltageapp.io/api/v1";
+    }
+
+    async getNodeInfo(): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiUrl}/wallet`, {
+                method: "GET",
+                headers: {
+                    "accept": "application/json",
+                    "X-API-KEY": this.privateKey,
+                },
+            });
+
+            // Log the response status and headers
+            console.log("Response status:", response.status);
+            console.log("Response headers:", response.headers);
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch node info. Status: ${response.status}`);
+            }
+
+            // Parse and log the JSON response
+            const data = await response.json();
+            console.log("Response data:", data);
+
+            return data;
+        } catch (error) {
+            console.error("Error fetching node info:", error);
+            throw error;
+        }
+    }
+}
+
+class LndService {
+    private lndFeignClient: LndFeignClient;
+
+    constructor(lndFeignClient: LndFeignClient) {
+        this.lndFeignClient = lndFeignClient;
+    }
+
+    async getNodeInfo() {
+        return await this.lndFeignClient.getNodeInfo();
+    }
+
+    async getBalance(address: string) {
+        try {
+            const response = await this.getNodeInfo();
+
+            if (!response) {
+                console.log("Failed to fetch node info. Status:", response.balance);
+                throw new Error(`Failed to fetch lighnting balance. Status: ${response.status}`);
+            }
+
+            return await response.balance;
+        } catch (error) {
+            console.error("Error fetching balance:", error);
+            throw error;
+        }
+
+    }
+}
+
+
 //TODO: handle different networks
 const network: bitcoin.Network = bitcoin.networks.testnet;
 
@@ -72,6 +141,24 @@ async function getWalletInfoMnemonic(mnemonicPhrase: string) {
     return walletInfo
 }
 
+
+
+async function getWalletInfoLnd(privateKey: string): Promise<WalletInfo> {
+    const lndService = new LndService(new LndFeignClient());
+    const nodeInfo = await lndService.getNodeInfo();
+    console.log("nodeInfo", nodeInfo);
+    return {
+        mnemonic: "",
+        address: nodeInfo.identity_pubkey,
+        network: WalletNetwork.Lightning,
+        privateKey: privateKey,
+        publicKey: nodeInfo.identity_pubkey
+    }
+
+
+}
+
+
 async function getEthWalletInfoFromPrivateKey(privateKey: string): Promise<WalletInfo> {
     // Ensure the private key is valid
     // if (!ethers.isHexString(privateKey, 32)) {
@@ -114,12 +201,17 @@ async function fetchBalance(address: string, network: WalletNetwork) {
             const data:AddressInfo = response.data;
             const remaining = data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum;
             return remaining/100000000;
-        } else {
+        } else if (network === WalletNetwork.Citrea) {
             const response = await axios.get(`https://explorer.testnet.citrea.xyz/api/v2/addresses/${address}`);
             return response.data.coin_balance / 100000000;
+        }else if (network === WalletNetwork.Lightning) {
+            let lndService = new LndService(new LndFeignClient());
+            const response = await lndService.getBalance(address);
+            console.log("response last", response);
+            return response / 100000000;
         }
     } catch (error) {
-        console.error("Error fetching balance:", error);
+        console.error("Error fetching balance23:", error);
     }
 }
 
@@ -135,7 +227,9 @@ const fetchBalanceFromPhase = async (mnemonicPhrase: string) => {
     return -1
 }
 
-export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey, getEthWalletInfoFromMnemonic}
+export {generateMnemonic,createNewWallet, getWalletInfoMnemonic, fetchBalance, getWalletInfoLnd,fetchBalanceFromPhase, getEthWalletInfoFromPrivateKey, getEthWalletInfoFromMnemonic,
+    LndService, LndFeignClient
+}
 
 /* Generated Address Wallet 1 BTC
 Mnemonic:  praise valley time inject leg vintage burst bottom unfair luggage mixed level

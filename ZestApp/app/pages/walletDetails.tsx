@@ -128,7 +128,7 @@ export default function WalletDetails() {
                     <Card mode="outlined">
                         <Card.Title title={wallet.name} />
                         <Card.Content>
-                            <Text>Balance: ${wallet.balance}</Text>
+                            <Text>Balance: {wallet.balance} sats</Text>
                             <Text>Network: {wallet.network}</Text>
                         </Card.Content>
                     </Card>
