@@ -203,7 +203,7 @@ async function fetchBalance(address: string, network: WalletNetwork) {
             return remaining/100000000;
         } else if (network === WalletNetwork.Citrea) {
             const response = await axios.get(`https://explorer.testnet.citrea.xyz/api/v2/addresses/${address}`);
-            return response.data.coin_balance / 100000000;
+            return ethers.formatEther(response.data.coin_balance);
         }else if (network === WalletNetwork.Lightning) {
             let lndService = new LndService(new LndFeignClient());
             const response = await lndService.getBalance(address);
@@ -253,5 +253,5 @@ tb1qqxqe6f08zsjz8j54duhwcfphctwq6qxunjmtpq
 
 /* Wallet 3 cBTC
 0xEda026247a58aFca8B98cEE391e7D72c25BC5A09
-
+68f0850abe026c4020804d32a0d3aa322f9097f3abcdda58ccec7bc1ca534964
  */

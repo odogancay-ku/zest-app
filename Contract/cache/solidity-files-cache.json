@@ -1,0 +1,40 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/omerislam/Desktop/Ömer/Koç/4th Year/bitirme/Contract/contracts/AtomicSwap.sol": {
+      "lastModificationDate": 1735587965991,
+      "contentHash": "a3083e11e619f7cfede3aa347216fe31",
+      "sourceName": "contracts/AtomicSwap.sol",
+      "solcConfig": {
+        "version": "0.8.0",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AtomicSwap"
+      ]
+    }
+  }
+}
