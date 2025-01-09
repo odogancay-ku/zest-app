@@ -8,8 +8,7 @@ import * as SecureStore from 'expo-secure-store';
 import {
     getWalletInfoMnemonic,
     getEthWalletInfoFromPrivateKey,
-    getEthWalletInfoFromMnemonic,
-    getWalletInfoLnd
+    getEthWalletInfoFromMnemonic, createLightningWallet,
 } from "@/app/wallet-import";
 import {Wallet, WalletInfo} from "@/models/models";
 import {View, Alert} from "react-native";
@@ -77,7 +76,7 @@ export default function AddWallet() {
                 await SecureStore.setItemAsync('wallets', JSON.stringify(wallets));
                 router.replace('/');
             }else if (walletNetwork === WalletNetwork.Lightning) {
-                let walletInfo: WalletInfo = await getWalletInfoLnd(key);
+                let walletInfo: WalletInfo = await createLightningWallet(walletName);
                 let newWallet: Wallet = {
                     id: new_id.toString(),
                     name: walletName,
@@ -151,6 +150,7 @@ export default function AddWallet() {
 
             <Button
                 mode="contained"
+                disabled={walletNetwork === WalletNetwork.Lightning}
                 onPress={() => {
                     router.push({
                         pathname: './privateKeywords',

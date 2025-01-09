@@ -7,9 +7,10 @@ import * as SecureStore from "expo-secure-store";
 import { Wallet } from "@/models/models";
 import { fetchBalance } from "@/app/wallet-import";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
-import {makeTransaction} from "@/app/make-transaction";
+import {createInvoice, makeTransaction, payLightningInvoice} from "@/app/make-transaction";
 import { View, StyleSheet, TouchableOpacity, Pressable, Modal} from "react-native";
 import {Camera, BarcodeScanningResult, CameraView, useCameraPermissions} from "expo-camera";
+import {WalletNetwork} from "@/constants/Enums";
 
 
 export default function Transaction() {
@@ -25,6 +26,9 @@ export default function Transaction() {
     const [permission, requestPermission] = useCameraPermissions();
 
     const [customData, setCustomData] = useState<string>("");
+    const [selectedNetwork, setSelectedNetwork] = useState<WalletNetwork | null>(null);
+    const [invoiceAmount, setInvoiceAmount] = useState<string>("");
+    const [invoiceId, setInvoiceId] = useState<string>("");
     const fetchWallets = async () => {
         const storedWallets = await SecureStore.getItemAsync("wallets");
 
@@ -42,7 +46,11 @@ export default function Transaction() {
             setWallets([]);
         }
     };
-
+    const handleSelected = (itemValue: string) => {
+        const selectedWallet = wallets.find((wallet) => wallet.id === itemValue);
+        setSelectedNetwork(selectedWallet?.network ?? null);
+        setSelectedWalletId(itemValue);
+    };
     useEffect(() => {
         fetchWallets();
     }, []);
@@ -150,14 +158,49 @@ export default function Transaction() {
                     <Text variant="headlineSmall">Choose Wallet</Text>
                     <Picker
                         selectedValue={selectedWalletId}
-                        onValueChange={(itemValue) => setSelectedWalletId(itemValue)}
+                        onValueChange={(itemValue) => handleSelected(itemValue)}
                     >
                         {wallets.map((wallet) => (
                             <Picker.Item key={wallet.id} label={wallet.name} value={wallet.id} />
                         ))}
                     </Picker>
                 </Surface>
+                {selectedNetwork === WalletNetwork.Lightning ? (
+                    <>
+                        {/* Lightning-specific UI */}
+                        <Surface style={{padding: 16, elevation: 2}}>
+                            <Text variant="headlineSmall">Create Invoice</Text>
+                            <TextInput
+                                mode="outlined"
+                                value={invoiceAmount}
+                                onChangeText={setInvoiceAmount}
+                                placeholder="Invocie Amount"
+                            />
 
+                            <Button mode="contained" onPress={() => createInvoice(Number(invoiceAmount), "")}
+                                    style={{marginVertical: 8}}>
+                                Pay Invoice
+                            </Button>
+                        </Surface>
+                        <Surface style={{padding: 16, elevation: 2}}>
+                            <Text variant="headlineSmall"
+                            >Pay Invoice</Text>
+                            <TextInput
+                                mode="outlined"
+                                value={invoiceId}
+                                onChangeText={setInvoiceAmount}
+                                placeholder="Invoice"
+                            />
+                            <Button mode="contained" onPress={() => {
+                                const selectedWallet = wallets.find((wallet) => wallet.id === selectedWalletId);
+                                payLightningInvoice(invoiceId, selectedWallet?.privateKey ?? "");
+                            }} style={{marginVertical: 8}}>
+                                Pay Invoice
+                            </Button>
+                        </Surface>
+                    </>
+                ) : (
+                    <>
                 {/* Address Input */}
                 <Surface style={{ padding: 16, elevation: 2 }}>
                     <Text variant="headlineSmall">Enter the Wallet Address</Text>
@@ -199,6 +242,7 @@ export default function Transaction() {
                         Send
                     </Button>
                 </Surface>
+                </>)}
             </SafeAreaView>
         </KeyboardAwareScrollView>
     );
