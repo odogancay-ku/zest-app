@@ -143,4 +143,61 @@ async function sendTransactionCitrea(connectedWallet: Wallet, receiver: string, 
 }
 
 
-export {makeTransaction};
+async function createInvoice(amount: number, memo: string) {
+    try {
+        // Make a POST request to the LNbits API
+        const node_apiUrl = "https://f5953107e2.d.voltageapp.io/api/v1";
+        const response = await axios.post(
+            node_apiUrl + "/payments",
+            {
+                out: false, // `false` indicates that this is a receiving invoice
+                amount: amount, // Amount in satoshis
+                memo: memo, // Description for the invoice
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Api-Key": "0f41b520e44e4f44b539c58856dffe13", // Add the wallet API key
+                },
+            }
+        );
+
+        // Extract invoice details from the response
+        const invoice = response.data.payment_request;
+        const paymentHash = response.data.payment_hash;
+
+        console.log("Invoice created successfully!");
+        console.log("Payment Request (Invoice):", invoice);
+        console.log("Payment Hash:", paymentHash);
+
+        return invoice;
+    } catch (error) {
+        console.error("Error creating invoice:", error);
+    }
+}
+
+async function payLightningInvoice(invoice: string, apiKey: string) {
+    const node_apiUrl = "https://f5953107e2.d.voltageapp.io/api/v1";
+    const url = node_apiUrl + '/payments'; // Replace with your LNBits URL
+
+    try {
+        const response = await axios.post(
+            url,
+            {
+                out: true, // Indicates an outgoing payment
+                bolt11: invoice, // The Lightning invoice to pay
+            },
+            {
+                headers: {'X-Api-Key': apiKey, 'Content-Type': 'application/json'},
+            }
+        );
+
+        console.log('Payment Successful:', response.data);
+        return response.data;
+    } catch (error: any) {
+        console.error('Error Paying Invoice:', error.response?.data || error.message);
+    }
+}
+
+
+export {makeTransaction,createInvoice,payLightningInvoice};
