@@ -150,6 +150,7 @@ export default function AddWallet() {
 
             <Button
                 mode="contained"
+                disabled={walletNetwork === WalletNetwork.Lightning}
                 onPress={() => {
                     router.push({
                         pathname: './privateKeywords',

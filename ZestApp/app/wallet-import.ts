@@ -139,29 +139,25 @@ async function createLightningWallet(name:string): Promise<WalletInfo> {
     }
 }
 
-async function fetchBalance(address: string, network: WalletNetwork, apiKey?: string): Promise<number|any> {
+async function fetchBalance(address: string, network: WalletNetwork){
     try {
         console.log("fetching balance for address", address, "and network", network);
         if(network === WalletNetwork.Bitcoin) {
+            console.log("fetching balance for 53");
             const response= await axios.get(`https://blockstream.info/testnet/api/address/${address}`);
             const data:AddressInfo = response.data;
             const remaining = data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum;
             return remaining/100000000;
         } else if (network === WalletNetwork.Citrea) {
+            console.log("..")
             const response = await axios.get(`https://explorer.testnet.citrea.xyz/api/v2/addresses/${address}`);
             return ethers.formatEther(response.data.coin_balance);
         }else if (network === WalletNetwork.Lightning) {
-            const response = await axios.get(`https://f5953107e2.d.voltageapp.io/api/v1/wallet/`, {
-                headers: {
-                    "X-Api-Key": apiKey
-                }
-            });
-            console.log("response last", response);
-            const balance:number = response.data.balance;
-            return balance / 100000000;
+            return 0;
         }
     } catch (error) {
         console.error("Error fetching balance23:", error);
+        console.log("error", network);
     }
 }
 

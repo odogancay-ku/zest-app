@@ -4,13 +4,19 @@ import {ethers} from "ethers";
 
 const fetchTransactions = async (address: string, network: WalletNetwork) => {
     let url;
+    try{
     if (network === WalletNetwork.Bitcoin) {
         console.log("fetching transactions for bitcoin");
         url = `https://blockstream.info/testnet/api/address/${address}/txs`;
     } else if (network === WalletNetwork.Citrea) {
         console.log("fetching transactions for citrea");
         url = `https://explorer.testnet.citrea.xyz/api/v2/addresses/${address}/transactions`
-    } else {
+
+    }
+    else if (network === WalletNetwork.Lightning) {
+        url = '';
+    }
+    else {
         throw new Error("Invalid network");
     }
 
@@ -54,6 +60,14 @@ const fetchTransactions = async (address: string, network: WalletNetwork) => {
                 receiverWalletAddress: tx.to
             };
         });
+    }
+    else if (network === WalletNetwork.Lightning) {
+        return [];
+    }
+    }
+    catch (error) {
+        console.error("Error fetching transactions:", error);
+        return [];
     }
 
 };
