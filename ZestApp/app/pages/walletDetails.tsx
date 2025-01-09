@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {ScrollView, View, Alert, Modal, StyleSheet, TouchableOpacity} from "react-native";
+import {View, Alert, Modal, StyleSheet, TouchableOpacity} from "react-native";
 import {Stack, useLocalSearchParams, useRouter} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Text, Card, Button, useTheme, Divider} from "react-native-paper";
@@ -10,19 +10,10 @@ import {TransactionHistory, Wallet} from "@/models/models";
 import LoadingOverlay from "@/app/widgets/LoadingOverlay"; // Adjust the import path as needed
 import QRCode from 'react-qr-code';
 import createStyles from "@/app/styles/styles";
-import TransactionHistoryTable from "@/app/widgets/TransactionHistoryTable"; // Adjust import path as needed
+import TransactionHistoryTable from "@/app/widgets/TransactionHistoryTable";
+import {fetchTransactions} from "@/app/fetch-transaction";
 
-const fetchTransactions = async (address: string) => {
-    const url = `https://blockstream.info/testnet/api/address/${address}/txs`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch transactions");
-        return await response.json();
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
-};
+
 
 export default function WalletDetails() {
     const {selectedWalletId = 0} = useLocalSearchParams();
@@ -30,7 +21,7 @@ export default function WalletDetails() {
 
     const [qrModalVisible, setQrModalVisible] = useState(false);
 
-    const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
+    const [walletTransactions, setWalletTransactions] = useState<TransactionHistory[]>([]);
     const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -57,7 +48,7 @@ export default function WalletDetails() {
                     const wallet = {...selectedWallet, balance};
                     setWallet(wallet);
 
-                    const transactions = await fetchTransactions(selectedWallet.address);
+                    const transactions = await fetchTransactions(selectedWallet.address, selectedWallet.network);
                     setWalletTransactions(transactions);
                 } else {
                     setWallet(null);
@@ -140,44 +131,15 @@ export default function WalletDetails() {
                         </View>
                     </Card>
 
-
-                    <Text variant="titleMedium">Transaction History</Text>
-                    <Card mode="outlined" style={{flex: 1}}>
-                        <Card.Content>
-                            <ScrollView>
-                                <Divider style={{marginBottom: 10}}/>
-                                <View key={1} style={{flexDirection: "row", justifyContent: "space-between"}}>
-                                    <Text>Date</Text>
-                                    <Text>Type</Text>
-                                    <Text>Amount</Text>
-                                </View>
-                                <Divider style={{marginVertical: 10}}/>
-                                {walletTransactions.length > 0 ? (
-                                    walletTransactions.map((transaction) => (
-                                        <View
-                                            key={transaction.id}
-                                            style={{
-                                                flexDirection: "row",
-                                                justifyContent: "space-between",
-                                                marginBottom: 10,
-                                            }}
-                                        >
-                                            <Text>{transaction.date}</Text>
-                                            <Text>{transaction.type}</Text>
-                                            <Text>${transaction.amount}</Text>
-                                        </View>
-                                    ))
-                                ) : (
-                                    <Text style={{textAlign: "center", color: theme.colors.primary}}>
-                                        No transactions available.
-                                    </Text>
-                                )}
-                            </ScrollView>
-                        </Card.Content>
-                    </Card>
                     <View style={{marginTop: 10}}>
                         <Button mode="contained" color={theme.colors.error} onPress={showQRCode}>
                             Show QR
+                        </Button>
+                    </View>
+
+                    <View style={{marginTop: 10}}>
+                        <Button mode="contained" color={theme.colors.error} onPress={confirmDeleteWallet}>
+                            Delete This Wallet
                         </Button>
                     </View>
                     <View style={{marginTop: 0}}>
@@ -187,7 +149,7 @@ export default function WalletDetails() {
                             isFetching={loading}
                             onRefresh={async () => {
                                 setLoading(true);
-                                const transactions = await fetchTransactions(wallet.address);
+                                const transactions = await fetchTransactions(wallet.address, wallet.network);
                                 setWalletTransactions(transactions);
                                 setLoading(false);
                             }}
@@ -202,11 +164,6 @@ export default function WalletDetails() {
                             selectedTransaction={selectedTransaction}
                         />
 
-                        <View style={{marginTop: 20}}>
-                            <Button mode="contained" color={theme.colors.error} onPress={confirmDeleteWallet}>
-                                Delete This Wallet
-                            </Button>
-                        </View>
                         {/* Show QR Code */}
                         <Modal
                             animationType="fade"

@@ -7,12 +7,13 @@ import {
     View,
 } from 'react-native';
 import {Card, Text, Divider, useTheme} from 'react-native-paper';
-import TransactionDetailModal from './TransactionDetailModal'; // Adjust import based on file structure
+import TransactionDetailModal from './TransactionDetailModal';
+import {TransactionHistory} from "@/models/models"; // Adjust import based on file structure
 
 interface TransactionHistoryTableProps {
     isFetching: boolean;
     onRefresh: () => void;
-    currentTransactions: any[];
+    currentTransactions: TransactionHistory[];
     handleTransactionClick: (tx: any) => void;
     currentWallet: any;
     modalVisible: boolean;
@@ -34,22 +35,24 @@ const TransactionHistoryTable = ({
 
     const theme = useTheme();
 
-    const calculateNetBalance = (tx: any, address: string) => {
-        const incoming = tx.vout
-            .filter((output: any) => output.scriptpubkey_address === address)
-            .reduce((sum: number, output: any) => sum + output.value, 0);
-
-        const outgoing = tx.vin
-            .filter((input: any) => input.prevout?.scriptpubkey_address === address)
-            .reduce((sum: number, input: any) => sum + input.prevout.value, 0);
-
-        return incoming - outgoing; // Positive for incoming, negative for outgoing
-    };
-
     return (
         <Card style={{padding: 10}}>
             <Card.Title title="Transaction History"/>
             <Divider/>
+
+            <View
+                style={{
+                    flexDirection: 'row',
+                    paddingVertical: 10,
+                    paddingHorizontal: 5,
+                    borderBottomWidth: 1,
+                    borderColor: theme.colors.outline,
+                }}
+            >
+                <Text style={{flex: 1, fontSize: 16, fontWeight: 'bold'}}>Date</Text>
+                <Text style={{flex: 1, fontSize: 16, fontWeight: 'bold'}}>Status</Text>
+                <Text style={{flex: 1, fontSize: 16, fontWeight: 'bold'}}>Amount</Text>
+            </View>
             <ScrollView
                 refreshControl={
                     <RefreshControl refreshing={isFetching} onRefresh={onRefresh}/>
@@ -57,7 +60,7 @@ const TransactionHistoryTable = ({
             >
                 {currentTransactions.length > 0 ? (
                     currentTransactions.map((tx) => (
-                        <TouchableOpacity key={tx.txid} onPress={() => handleTransactionClick(tx)}>
+                        <TouchableOpacity key={tx.id} onPress={() => handleTransactionClick(tx)}>
                             <View
                                 style={{
                                     flexDirection: 'row',
@@ -68,14 +71,13 @@ const TransactionHistoryTable = ({
                                 }}
                             >
                                 <Text style={{flex: 1, fontSize: 16}}>
-                                    {new Date(tx.status.block_time * 1000).toLocaleDateString()}
+                                    {new Date(tx.date).toLocaleDateString()}
                                 </Text>
                                 <Text style={{flex: 1, fontSize: 16}}>
-                                    {tx.status.confirmed ? 'Confirmed' : 'Pending'}
+                                    {tx.status}
                                 </Text>
                                 <Text style={{flex: 1, fontSize: 16}}>
-                                    {calculateNetBalance(tx, currentWallet.address) > 0 ? '+' : ''}
-                                    {calculateNetBalance(tx, currentWallet.address)}
+                                    {tx.amount}
                                 </Text>
                             </View>
                         </TouchableOpacity>
@@ -91,7 +93,6 @@ const TransactionHistoryTable = ({
                 onClose={() => setModalVisible(false)}
                 transaction={selectedTransaction}
                 walletAddress={currentWallet?.address || ''}
-                calculateNetBalance={calculateNetBalance}
             />
         </Card>
     );

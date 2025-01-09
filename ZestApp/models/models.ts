@@ -28,11 +28,13 @@ interface WalletInfo{
 }
 
 interface TransactionHistory {
-    id: number;
-    walletId: string;
-    amount: number;
+    id: string;
+    senderWalletAddress: string;
+    receiverWalletAddress: string;
+    amount: string;
+    fee: string;
     date: string;
-    type: string;
+    status: string;
 }
 interface UTXO {
     txid: string;

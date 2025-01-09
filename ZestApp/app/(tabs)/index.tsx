@@ -25,18 +25,8 @@ import createStyles from "@/app/styles/styles";
 import TransactionDetailModal from "@/app/widgets/TransactionDetailModal";
 import TransactionHistoryTable from "@/app/widgets/TransactionHistoryTable";
 import {fetchBalance} from "@/app/wallet-import";
+import {fetchTransactions} from "@/app/fetch-transaction";
 
-const fetchTransactions = async (address: string) => {
-    const url = `https://blockstream.info/testnet/api/address/${address}/txs`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch transactions");
-        return await response.json();
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
-};
 
 export default function HomeScreen() {
     const [wallets, setWallets] = useState<WalletDisplay[]>([]);
@@ -73,7 +63,7 @@ export default function HomeScreen() {
         if (isFetching) return; // Prevent multiple fetches
         setIsFetching(true);
 
-        const newTransactions = await fetchTransactions(wallet.address);
+        const newTransactions = await fetchTransactions(wallet.address, wallet.network);
         setTransactions((prev) => ({
             ...prev,
             [wallet.id]: newTransactions
@@ -193,7 +183,15 @@ export default function HomeScreen() {
                 </Link>
             </ScrollView>
 
-            <TransactionHistoryTable isFetching={isFetching} onRefresh={onRefresh} currentTransactions={currentTransactions} handleTransactionClick={handleTransactionClick} currentWallet={currentWallet} modalVisible={modalVisible} setModalVisible={setModalVisible} selectedTransaction={selectedTransaction} />
+            <TransactionHistoryTable
+                isFetching={isFetching}
+                onRefresh={onRefresh}
+                currentTransactions={currentTransactions}
+                handleTransactionClick={handleTransactionClick}
+                currentWallet={currentWallet}
+                modalVisible={modalVisible}
+                setModalVisible={setModalVisible}
+                selectedTransaction={selectedTransaction} />
 
 
         </SafeAreaView>
