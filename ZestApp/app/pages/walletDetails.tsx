@@ -135,7 +135,7 @@ export default function WalletDetails() {
                         <Card.Title title={wallet.name}/>
                         <Divider/>
                         <View style={{gap: 10, padding: 10}}>
-                            <Text>Balance: ${wallet.balance}</Text>
+                            <Text>Balance: {wallet.balance} sats</Text>
                             <Text>Network: {wallet.network}</Text>
                         </View>
                     </Card>

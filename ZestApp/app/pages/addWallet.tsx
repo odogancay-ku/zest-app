@@ -5,7 +5,12 @@ import {TextInput, Button, Text, useTheme, Surface} from 'react-native-paper';
 import {Picker} from "@react-native-picker/picker";
 import * as Clipboard from 'expo-clipboard';
 import * as SecureStore from 'expo-secure-store';
-import {getWalletInfoMnemonic, getEthWalletInfoFromPrivateKey, getEthWalletInfoFromMnemonic} from "@/app/wallet-import";
+import {
+    getWalletInfoMnemonic,
+    getEthWalletInfoFromPrivateKey,
+    getEthWalletInfoFromMnemonic,
+    getWalletInfoLnd
+} from "@/app/wallet-import";
 import {Wallet, WalletInfo} from "@/models/models";
 import {View, Alert} from "react-native";
 import LoadingOverlay from "@/app/widgets/LoadingOverlay";
@@ -71,7 +76,21 @@ export default function AddWallet() {
                 wallets.push(newWallet);
                 await SecureStore.setItemAsync('wallets', JSON.stringify(wallets));
                 router.replace('/');
-            }
+            }else if (walletNetwork === WalletNetwork.Lightning) {
+                let walletInfo: WalletInfo = await getWalletInfoLnd(key);
+                let newWallet: Wallet = {
+                    id: new_id.toString(),
+                    name: walletName,
+                    network: walletNetwork,
+                    privateKey: walletInfo.privateKey,
+                    address: walletInfo.address,
+                    publicKey: walletInfo.publicKey,
+                    balance: 0
+                };
+                wallets.push(newWallet);
+                await SecureStore.setItemAsync('wallets', JSON.stringify(wallets));
+                router.replace('/');
+                }
         } catch (error) {
             console.log("error", error);
             Alert.alert('Error', 'Failed to save wallet. Please try again.');
@@ -112,6 +131,7 @@ export default function AddWallet() {
                 >
                     <Picker.Item label="Bitcoin" value={WalletNetwork.Bitcoin} />
                     <Picker.Item label="Citrea" value={WalletNetwork.Citrea} />
+                    <Picker.Item label="Lightning" value={WalletNetwork.Lightning} />
                 </Picker>
                 <Text>Selected Currency: {walletNetwork}</Text>
             </Surface>
