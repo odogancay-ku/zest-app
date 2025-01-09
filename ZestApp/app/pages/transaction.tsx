@@ -158,7 +158,7 @@ export default function Transaction() {
                     <Text variant="headlineSmall">Choose Wallet</Text>
                     <Picker
                         selectedValue={selectedWalletId}
-                        onValueChange={(itemValue) => setSelectedWalletId(itemValue)}
+                        onValueChange={(itemValue) => handleSelected(itemValue)}
                     >
                         {wallets.map((wallet) => (
                             <Picker.Item key={wallet.id} label={wallet.name} value={wallet.id} />
