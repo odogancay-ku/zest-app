@@ -6,7 +6,7 @@ const atomicSwapAddress = "0x181A33a656E3457AfF24c679D7Ba35bb3d18f8e0";
 const atomicSwapAbi = contract.abi;
 
 async function createSwap(privateKey: string, toBeSent: number, toBeReceived: number, recipientAddress: string) {
-    console.log("Creating swap...");
+    //console.log("Creating swap...");
     const provider = new ethers.JsonRpcProvider("https://rpc.testnet.citrea.xyz");
     const wallet = new ethers.Wallet(privateKey, provider);
     const atomicSwap = new ethers.Contract(atomicSwapAddress, atomicSwapAbi, wallet);
@@ -15,7 +15,7 @@ async function createSwap(privateKey: string, toBeSent: number, toBeReceived: nu
         ethers.parseEther(toBeSent.toString()),
         {value: ethers.parseEther(toBeReceived.toString())}
     );
-    console.log("Swap created!");
+    //console.log("Swap created!");
 }
 
 async function initVerification(privateKey: string, txid: string, swapId: number) {

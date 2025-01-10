@@ -92,7 +92,7 @@ export default function HomeScreen() {
     const currentTransactions = currentWallet ? transactions[currentWallet.id] || [] : [];
 
     const handleTransactionClick = (transaction: any) => {
-        console.log("Transaction clicked:", transaction);
+        //console.log("Transaction clicked:", transaction);
         if (!transaction) {
             console.error("Invalid transaction");
             return;
@@ -116,7 +116,7 @@ export default function HomeScreen() {
                         <Card
                             style={{height: 200, backgroundColor: theme.colors.primaryContainer}}
                             onPress={() => router.push('/pages/addWallet')}
-                        >
+                            >
                             <Card.Content style={{alignItems: 'center', justifyContent: 'center', height: '100%'}}>
                                 <IconButton
                                     icon="plus"
@@ -131,13 +131,18 @@ export default function HomeScreen() {
                                 pathname: '/pages/walletDetails',
                                 params: {selectedWalletId: item.id}
                             })}
+                            onFocus={(event) => {
+                                setSelectedWalletIndex(parseInt(item.id))
+                            }}
                         >
                             <Card style={{
                                 height: 200,
                                 backgroundColor: theme.colors.primaryContainer,
                                 paddingVertical: 10
-                            }}>
-                                <Card.Content style={{height: '100%', justifyContent: 'space-between'}}>
+                            }}
+                            >
+                                <Card.Content style={{height: '100%', justifyContent: 'space-between'}}
+                                >
                                     <Text variant="headlineSmall" style={{fontSize: 20}}>{item.name}</Text>
                                     <Text style={{fontSize: 14}}>Balance: {item.balance}</Text>
                                     <Text style={{fontSize: 14}}>Network: {item.network}</Text>
@@ -177,7 +182,9 @@ export default function HomeScreen() {
                         <FontAwesome6 name="money-bill-transfer" size={30} color="black"/>
                     </CircleButton>
                 </Link>
-                <Link href={{pathname: "/pages/walletDetails", params: {selectedWalletIndex}}} asChild>
+                <Link
+                    href={{pathname: "/pages/walletDetails", params: {selectedWalletId: wallets[selectedWalletIndex] ? wallets[selectedWalletIndex].id : ""}}}
+                      asChild>
                     <CircleButton>
                         <MaterialCommunityIcons name="card-account-details" size={30} color="black"/>
                     </CircleButton>
@@ -192,7 +199,7 @@ export default function HomeScreen() {
                 currentWallet={currentWallet}
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
-                selectedTransaction={selectedTransaction} />
+                selectedTransaction={selectedTransaction}/>
 
 
         </SafeAreaView>

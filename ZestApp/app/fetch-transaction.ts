@@ -6,10 +6,10 @@ const fetchTransactions = async (address: string, network: WalletNetwork) => {
     let url;
     try{
     if (network === WalletNetwork.Bitcoin) {
-        console.log("fetching transactions for bitcoin");
+        //console.log("fetching transactions for bitcoin");
         url = `https://blockstream.info/testnet/api/address/${address}/txs`;
     } else if (network === WalletNetwork.Citrea) {
-        console.log("fetching transactions for citrea");
+        //console.log("fetching transactions for citrea");
         url = `https://explorer.testnet.citrea.xyz/api/v2/addresses/${address}/transactions`
 
     }
@@ -67,7 +67,7 @@ const fetchTransactions = async (address: string, network: WalletNetwork) => {
     }
     }
     catch (error) {
-        console.error("Error fetching transactions:", error);
+        console.error("Error fetching transactions:", error,"for network:",network);
         return [];
     }
 
