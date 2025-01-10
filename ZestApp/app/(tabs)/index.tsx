@@ -18,7 +18,7 @@ import Carousel from "react-native-snap-carousel";
 import {Link, useRouter} from "expo-router";
 import CircleButton from "@/app/widgets/CircleButton";
 import * as SecureStore from 'expo-secure-store';
-import {WalletDisplay} from "@/models/models";
+import {TransactionHistory, WalletDisplay} from "@/models/models";
 import {WalletNetwork} from "@/constants/Enums";
 import {FontAwesome6, MaterialCommunityIcons, MaterialIcons} from "@expo/vector-icons";
 import createStyles from "@/app/styles/styles";
@@ -33,7 +33,7 @@ export default function HomeScreen() {
     const [selectedWalletIndex, setSelectedWalletIndex] = useState<number>(0);
     const [transactions, setTransactions] = useState<Record<string, any[]>>({});
     const [isFetching, setIsFetching] = useState<boolean>(false);
-    const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+    const [selectedTransaction, setSelectedTransaction] = useState<TransactionHistory | null>(null);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const theme = useTheme();
     const router = useRouter();
@@ -92,6 +92,7 @@ export default function HomeScreen() {
     const currentTransactions = currentWallet ? transactions[currentWallet.id] || [] : [];
 
     const handleTransactionClick = (transaction: any) => {
+        console.log("Transaction clicked:", transaction);
         if (!transaction) {
             console.error("Invalid transaction");
             return;

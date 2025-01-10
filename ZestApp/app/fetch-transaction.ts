@@ -15,6 +15,7 @@ const fetchTransactions = async (address: string, network: WalletNetwork) => {
     }
     else if (network === WalletNetwork.Lightning) {
         url = '';
+        return [];
     }
     else {
         throw new Error("Invalid network");
@@ -54,10 +55,10 @@ const fetchTransactions = async (address: string, network: WalletNetwork) => {
                 id: tx.hash,
                 date: tx.timestamp,
                 amount: (tx.from.hash === address ? "-" : "") + ethers.formatEther(tx.value),
-                fee: tx.fee,
+                fee: ethers.formatEther(tx.fee.value),
                 status: tx.confirmations > 0 ? "Confirmed" : "Pending",
-                senderWalletAddress: tx.from,
-                receiverWalletAddress: tx.to
+                senderWalletAddress: tx.from.hash,
+                receiverWalletAddress: tx.to.hash
             };
         });
     }
